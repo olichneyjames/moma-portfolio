@@ -1,0 +1,184 @@
+:root {
+  --font-display: 'Work Sans', sans-serif;
+  --font-body: 'Libre Franklin', sans-serif;
+
+  --color-bg: #ffffff;
+  --color-text: #000000;
+  --color-placeholder: #d9d9d9;
+
+  --stage-width: 1440px;
+  --frame-height: 1024px;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  padding: 0;
+  background: var(--color-bg);
+  color: var(--color-text);
+}
+
+body {
+  font-family: var(--font-body);
+  overflow-x: hidden;
+}
+
+#root {
+  display: block;
+}
+
+.stage-viewport {
+  position: relative;
+  overflow: hidden;
+  width: 100%;
+}
+
+.stage {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: var(--stage-width);
+  transform-origin: top left;
+}
+
+.frame {
+  position: relative;
+  width: var(--stage-width);
+  height: var(--frame-height);
+  background: var(--color-bg);
+  overflow: hidden;
+}
+
+.abs {
+  position: absolute;
+}
+
+.placeholder {
+  background: var(--color-placeholder);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+}
+
+.placeholder__label {
+  font-family: var(--font-body);
+  font-weight: 400;
+  color: var(--color-text);
+  white-space: nowrap;
+}
+
+.reveal {
+  opacity: 0;
+  will-change: transform, opacity;
+}
+
+.parallax {
+  will-change: transform;
+}
+
+.fw-semibold {
+  font-weight: 600;
+}
+
+/* Body frame (label + copy + image) — shared by frames 2, 3, and future ones */
+.body-frame__label {
+  margin: 0;
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: 18px;
+  line-height: normal;
+  white-space: nowrap;
+}
+
+.body-frame__copy {
+  margin: 0;
+  font-family: var(--font-body);
+  font-weight: 400;
+  font-size: 16px;
+  line-height: normal;
+}
+
+.body-copy__lead {
+  margin: 0 0 16px 0;
+}
+
+.body-copy__list {
+  margin: 0;
+  padding: 0;
+  list-style-position: outside;
+  padding-left: 24px;
+}
+
+.body-copy__list li {
+  margin-bottom: 16px;
+}
+
+.body-copy__list li:last-child {
+  margin-bottom: 0;
+}
+
+/* Hero (frame 1) */
+.hero__title {
+  margin: 0;
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 100px;
+  line-height: 94.945%;
+  color: var(--color-text);
+}
+
+.hero__tags {
+  display: flex;
+  align-items: center;
+  gap: 24px;
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: 18px;
+  white-space: nowrap;
+}
+
+.hero__copy {
+  margin: 0;
+  font-family: var(--font-body);
+  font-weight: 400;
+  font-size: 16px;
+  line-height: normal;
+}
+
+.hero__copy p {
+  margin: 0;
+}
+
+.hero__copy-desc {
+  margin-bottom: 48px !important;
+}
+
+/* Frame 4 — next case studies + footer */
+.next-nav__link {
+  margin: 0;
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: 18px;
+  white-space: nowrap;
+}
+
+.next-nav__tags {
+  margin: 0;
+  font-family: var(--font-body);
+  font-weight: 600;
+  font-size: 16px;
+  line-height: normal;
+}
+
+.next-nav__tags p {
+  margin: 0;
+}
+
+.next-nav__tags--right {
+  text-align: right;
+}
