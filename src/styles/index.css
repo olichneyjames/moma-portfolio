@@ -615,6 +615,21 @@ body {
     --footer-band-aspect-ratio: 390 / 266;
   }
 
+  /* Not `start` (the plain .section default) either — opt the footer
+     out of scroll-snap entirely at this size, rather than swap which
+     edge it snaps to. Snapping to it at all forces an abrupt jump
+     straight to the resting position, which was cutting the .reveal
+     fade-in short (it triggers off ordinary scroll position, so it
+     needs to actually be scrolled INTO rather than snapped onto). With
+     no snap target here, scrolling past Problem's notch just continues
+     as normal free scroll into the footer, and --footer-top's own
+     padding-top above still guarantees the reference's whitespace above
+     "< New York Times Games" regardless of exactly where that scroll
+     happens to settle. */
+  .section[data-frame="4"] {
+    scroll-snap-align: none;
+  }
+
   .footer-top {
     /* 80px above "< New York Times Games", matching the same top-of-frame
        offset already used for Before/Problem at this size (see below) —
