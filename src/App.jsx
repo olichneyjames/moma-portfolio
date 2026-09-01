@@ -5,17 +5,12 @@ import { ScrollTrigger } from 'gsap/ScrollTrigger'
 import Hero from './sections/Hero.jsx'
 import BeforeAfter from './sections/BeforeAfter.jsx'
 import Problem from './sections/Problem.jsx'
-import NextAndFooter, { FRAME_HEIGHT as FRAME_4_HEIGHT } from './sections/NextAndFooter.jsx'
-import useScaleToFit from './hooks/useScaleToFit.js'
+import NextAndFooter from './sections/NextAndFooter.jsx'
 
 gsap.registerPlugin(ScrollTrigger)
 
-const FRAME_HEIGHT = 1024
-const STAGE_HEIGHT = FRAME_HEIGHT * 3 + FRAME_4_HEIGHT
-
 export default function App() {
-  const scale = useScaleToFit()
-  const stageRef = useRef(null)
+  const pageRef = useRef(null)
 
   useEffect(() => {
     const ctx = gsap.context(() => {
@@ -58,24 +53,23 @@ export default function App() {
           },
         )
       })
-    }, stageRef)
+    }, pageRef)
 
     return () => ctx.revert()
   }, [])
 
   useEffect(() => {
-    const id = requestAnimationFrame(() => ScrollTrigger.refresh())
-    return () => cancelAnimationFrame(id)
-  }, [scale])
+    const handleResize = () => ScrollTrigger.refresh()
+    window.addEventListener('resize', handleResize)
+    return () => window.removeEventListener('resize', handleResize)
+  }, [])
 
   return (
-    <div className="stage-viewport" style={{ height: STAGE_HEIGHT * scale }}>
-      <div className="stage" ref={stageRef} style={{ transform: `scale(${scale})` }}>
-        <Hero />
-        <BeforeAfter />
-        <Problem />
-        <NextAndFooter />
-      </div>
+    <div className="page" ref={pageRef}>
+      <Hero />
+      <BeforeAfter />
+      <Problem />
+      <NextAndFooter />
     </div>
   )
 }

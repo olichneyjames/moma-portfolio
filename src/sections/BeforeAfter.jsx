@@ -6,12 +6,16 @@ export default function BeforeAfter() {
   const { before, after } = bodyFrames
 
   return (
-    <section className="frame" data-frame="2">
-      <BodyFrame label={before.label} copy={before.copy} labelTop={245} copyTop={304} />
-      <BodyFrame label={after.label} copy={after.copy} labelTop={499} copyTop={558} />
+    <section className="frame section section--body" data-frame="2">
+      <div className="section-row">
+        <div className="section-row__text">
+          <BodyFrame label={before.label} copy={before.copy} />
+          <BodyFrame label={after.label} copy={after.copy} />
+        </div>
 
-      <div className="reveal">
-        <Placeholder left={576} top={205} width={864} height={614} label="image 2" parallax />
+        <div className="section-row__image reveal">
+          <Placeholder aspectRatio="864 / 614" label="image 2" parallax />
+        </div>
       </div>
     </section>
   )

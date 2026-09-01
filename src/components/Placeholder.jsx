@@ -1,21 +1,25 @@
 export default function Placeholder({
-  left,
-  top,
-  width,
-  height,
   label,
+  aspectRatio,
+  height,
   fontSize = 63.734,
   parallax = false,
+  src,
+  className = '',
 }) {
   return (
     <div
-      className={`abs placeholder${parallax ? ' parallax' : ''}`}
-      style={{ left, top, width, height }}
+      className={`placeholder${parallax ? ' parallax' : ''}${className ? ` ${className}` : ''}`}
+      style={{ aspectRatio, height }}
       data-placeholder={label}
     >
-      <span className="placeholder__label" style={{ fontSize }}>
-        {label}
-      </span>
+      {src ? (
+        <img className="placeholder__image" src={src} alt={label} />
+      ) : (
+        <span className="placeholder__label" style={{ fontSize }}>
+          {label}
+        </span>
+      )}
     </div>
   )
 }

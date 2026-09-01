@@ -6,8 +6,58 @@
   --color-text: #000000;
   --color-placeholder: #d9d9d9;
 
-  --stage-width: 1440px;
-  --frame-height: 1024px;
+  --content-padding-x: 80px;
+  --row-gap: 80px;
+
+  /* Vertical text rhythm (label→body gap, gap between stacked info blocks
+     like "Before"/"After"). NOT a fluid value — measured directly from the
+     reference frames, it's ~40px at desktop only, then a flat 16px across
+     laptop, tablet, AND mobile alike (see the 1439px override below). A
+     clamp() here was wrong: it invented three different in-between values
+     instead of that flat 16px. */
+  --text-rhythm-gap: 40px;
+
+  /* Breakpoint tokens (desktop defaults — see the 1439/1023/767 media
+     queries below for the laptop/tablet/mobile steps). Text weight vs.
+     image weight controls how the section-row splits its width: the
+     image barely shrinks past the row's own narrowing, the text takes
+     the rest of the squeeze and wraps onto more lines instead. */
+  --header-height: 100px;
+  --hero-title-size: 100px;
+  --hero-title-max-width: 1072px;
+  --hero-title-margin-top: 80px;
+  --hero-title-margin-bottom: 110px;
+  --section-body-padding-y: 205px;
+  --footer-band-margin-top: 91px;
+  --row-text-weight: 417;
+  --row-image-weight: 864;
+  /* Hard ceiling on the text column, on top of the flex weights above:
+     within a breakpoint tier the weights are proportional, so on a wide
+     viewport near the top of a tier the text column can compute wider
+     than the reference frame (measured at that tier's narrowest width)
+     ever shows. Capping it at the reference's own max means any extra
+     room goes entirely to the image instead of stretching the text. */
+  --row-text-max-width: 416.67px;
+  /* Hero's own row config. Unlike body sections, the hero row keeps this
+     exact config (== the shared defaults, hence no visible difference)
+     all the way through desktop AND tablet/mobile — it only diverges at
+     laptop specifically (see 1439px override), where the reference shows
+     hero barely shrinking from desktop instead of adopting body's 253:614
+     split. Defined here (not just inline on .section-row--hero) so every
+     tier can redeclare only what actually changes for it. */
+  --hero-content-padding-x: 80px;
+  --hero-row-gap: 80px;
+  --hero-row-text-weight: 417;
+  --hero-row-image-weight: 864;
+  --hero-text-max-width: 416.67px;
+  /* 80px, not a smaller "in-between" value: the parallax drift on .placeholder
+     images (±8% of their own height, see App.jsx) eats into whatever static
+     gap sits between a stacked text block and its image, and at tablet's
+     taller images that can approach 40px+ at the extreme of the scroll — so
+     the resting gap needs real headroom. 80px matches the largest gap the
+     reference frames actually use (same value as the desktop/laptop row-gap),
+     which is the ceiling to stay at rather than inventing a bigger number. */
+  --stack-gap: 80px;
 }
 
 * {
@@ -31,33 +81,19 @@ body {
   display: block;
 }
 
-.stage-viewport {
+.page {
+  max-width: 1440px;
+  margin: 0 auto;
+}
+
+.section {
   position: relative;
-  overflow: hidden;
   width: 100%;
-}
-
-.stage {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: var(--stage-width);
-  transform-origin: top left;
-}
-
-.frame {
-  position: relative;
-  width: var(--stage-width);
-  height: var(--frame-height);
   background: var(--color-bg);
-  overflow: hidden;
-}
-
-.abs {
-  position: absolute;
 }
 
 .placeholder {
+  width: 100%;
   background: var(--color-placeholder);
   display: flex;
   align-items: center;
@@ -70,6 +106,13 @@ body {
   font-weight: 400;
   color: var(--color-text);
   white-space: nowrap;
+}
+
+.placeholder__image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
 }
 
 .reveal {
@@ -85,8 +128,67 @@ body {
   font-weight: 600;
 }
 
-/* Body frame (label + copy + image) — shared by frames 2, 3, and future ones */
-.body-frame__label {
+/* Responsive row: text column and image column split the row by
+   --row-text-weight : --row-image-weight (flex-basis 0 means all width
+   comes from these grow/shrink weights). That split changes at each
+   breakpoint — see the media queries below — so the image only shrinks by
+   about as much as the row itself narrows, while the text column gives up
+   more, wrapping onto more lines instead of shrinking in step. The text
+   column's font-size never changes. Below the tablet breakpoint the row
+   stacks instead (see max-width: 1023px), so the weights stop applying. */
+.section-row {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--row-gap);
+  /* Padding lives here (not on __text) in row mode so it comes off the
+     top of the available space before the flex weights split it — that
+     ordering is what makes the split land exactly on the reference's
+     pixel widths. The stacked breakpoint below moves padding onto
+     __text instead, since there the image needs to stay full-bleed. */
+  padding-left: var(--content-padding-x);
+}
+
+.section-row__text {
+  flex: var(--row-text-weight) var(--row-text-weight) 0%;
+  max-width: var(--row-text-max-width);
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--text-rhythm-gap);
+}
+
+.section-row__image {
+  flex: var(--row-image-weight) var(--row-image-weight) 0%;
+  min-width: 0;
+}
+
+.section-row.section-row--hero {
+  padding-left: var(--hero-content-padding-x);
+  gap: var(--hero-row-gap);
+}
+
+.section-row__text.section-row__text--hero {
+  flex: var(--hero-row-text-weight) var(--hero-row-text-weight) 0%;
+  max-width: var(--hero-text-max-width);
+}
+
+.section-row__image.section-row__image--hero {
+  flex: var(--hero-row-image-weight) var(--hero-row-image-weight) 0%;
+}
+
+.section--body {
+  padding: var(--section-body-padding-y) 0;
+}
+
+/* Info block (label + copy) — shared by frames 2, 3, and future ones */
+.info-block {
+  display: flex;
+  flex-direction: column;
+  gap: var(--text-rhythm-gap);
+  padding-top: var(--text-rhythm-gap);
+}
+
+.info-block__label {
   margin: 0;
   font-family: var(--font-display);
   font-weight: 600;
@@ -95,7 +197,7 @@ body {
   white-space: nowrap;
 }
 
-.body-frame__copy {
+.info-block__copy {
   margin: 0;
   font-family: var(--font-body);
   font-weight: 400;
@@ -123,23 +225,47 @@ body {
 }
 
 /* Hero (frame 1) */
+.header-bar {
+  height: var(--header-height);
+}
+
 .hero__title {
-  margin: 0;
+  margin: var(--hero-title-margin-top) var(--content-padding-x)
+    var(--hero-title-margin-bottom) var(--content-padding-x);
+  max-width: var(--hero-title-max-width);
   font-family: var(--font-display);
   font-weight: 700;
-  font-size: 100px;
+  font-size: var(--hero-title-size);
   line-height: 94.945%;
   color: var(--color-text);
 }
 
 .hero__tags {
   display: flex;
+  /* Two rules to satisfy together: (1) if the tags break onto more than
+     one row, the bottom row must have >= tags than any row above it, and
+     (2) earlier tags (in markup order — the most important) get priority
+     for the top row.
+     flex-wrap always fills a line to capacity before starting the next,
+     so only the *last-filled* line can end up smaller than the rest —
+     wrap-reverse puts that smaller line at the top, which gives us rule
+     (1) for free. For rule (2), the JSX renders the tags in reverse (last
+     tag first) so the *last-filled* line — the one that lands on top —
+     is built from the earliest tags instead of the latest ones;
+     row-reverse then un-reverses the left-to-right order within each
+     line so reading order still looks normal. row-reverse also flips
+     which edge counts as "start," so justify-content: flex-end is
+     needed to keep the tags packed against the left of the column
+     instead of the right. */
+  flex-direction: row-reverse;
+  flex-wrap: wrap-reverse;
+  justify-content: flex-end;
   align-items: center;
   gap: 24px;
+  padding-top: var(--text-rhythm-gap);
   font-family: var(--font-display);
   font-weight: 600;
   font-size: 18px;
-  white-space: nowrap;
 }
 
 .hero__copy {
@@ -158,7 +284,27 @@ body {
   margin-bottom: 48px !important;
 }
 
-/* Frame 4 — next case studies + footer */
+/* Footer (frame 4) — next case studies + footer band */
+.footer-top {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 40px;
+  padding: 0 var(--content-padding-x);
+}
+
+.footer-top__col {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.footer-top__col--right {
+  align-items: flex-end;
+  text-align: right;
+}
+
 .next-nav__link {
   margin: 0;
   font-family: var(--font-display);
@@ -179,6 +325,142 @@ body {
   margin: 0;
 }
 
-.next-nav__tags--right {
-  text-align: right;
+.footer-band {
+  margin-top: var(--footer-band-margin-top);
+}
+
+/* Breakpoints. Reference layouts (hand-built at these exact widths) live
+   in the Figma file's "made by me" page — desktop 1440 / laptop 1024 /
+   tablet 768 / mobile 390. Desktop is the :root default above. */
+
+/* Laptop: row layout holds, but the split shifts from 417:864 to 253:614
+   — the text column gives up proportionally more width than the image
+   (32.5% → 29.2% of the row), so the image only shrinks by about the
+   row's own narrowing while the text wraps onto more lines.
+   No --row-text-max-width override here (body text falls back to the
+   :root default, 416.67px, which never actually binds in this tier —
+   the 253:614 weight naturally computes ~373px at 1439px). An earlier
+   version capped it at exactly 253px, which is the value ONLY at this
+   tier's narrow end (1024px) — using it as a ceiling for the whole tier
+   made text hit that ceiling almost immediately and then sit frozen
+   while only the image kept responding as the viewport narrowed further.
+   Letting it flow naturally (253px→373px across the tier) is what makes
+   text actually shrink and wrap more, the way it's supposed to. */
+@media (max-width: 1439px) {
+  :root {
+    --row-text-weight: 253;
+    --row-image-weight: 614;
+    /* Hero does NOT adopt the 253:614 split above — the reference shows
+       its copy still at 416px here (unchanged from desktop) with its own
+       padding (50, not 80) and gap (58, not 80), image narrowed to 500
+       instead of 614. A fully separate row config, only at this tier —
+       desktop and tablet/mobile don't diverge this way. */
+    --hero-content-padding-x: 50px;
+    --hero-row-gap: 58px;
+    --hero-row-text-weight: 416;
+    --hero-row-image-weight: 500;
+    --hero-text-max-width: 416px;
+    /* Flat 16px, not a further point on a gradient — measured identically
+       at laptop, tablet, and mobile in the reference, so it's set once
+       here and left alone by the tablet/mobile blocks below. */
+    --text-rhythm-gap: 16px;
+    --hero-title-size: 68.94px;
+    --hero-title-max-width: 739px;
+    --hero-title-margin-top: 60px;
+    --hero-title-margin-bottom: 80px;
+    --header-height: 80px;
+    --section-body-padding-y: 160px;
+    --footer-band-margin-top: 70px;
+  }
+}
+
+/* Tablet & mobile: the row can't fit both columns without crushing the
+   text, so it stacks — text block first (still label-width padded on
+   both sides), full-bleed image beneath. Before/After and Problem stay
+   single-column (BodyFrame already stacks them). */
+@media (max-width: 1023px) {
+  :root {
+    --content-padding-x: 50px;
+    /* These two frames' own Figma layout grids (5 equal columns, edge to
+       edge) show text wrapping at a grid line rather than an arbitrary
+       width — but not the *same* line: body sections (before/after,
+       problem) wrap at the 3/5 line, while the hero column wraps at the
+       4/5 line (via --hero-text-max-width below).
+       This MUST be a proportion of the viewport (vw), not a fixed px
+       number frozen to the one 768px-wide reference frame — a grid
+       fraction scales with whatever width the device actually is. A
+       fixed px value here was wrong at any tablet width other than
+       exactly 768px (undershooting the grid line on anything wider).
+       max-width is also a border-box size (global box-sizing: border-box)
+       and __text carries padding on BOTH sides in stacked mode, so the
+       formula is (grid line − left padding) + both paddings added back
+       on = grid line + right padding: */
+    --row-text-max-width: calc(60vw + 50px);
+    --hero-text-max-width: calc(80vw + 50px);
+    --hero-title-size: 52.43px;
+    --hero-title-max-width: 562px;
+    --hero-title-margin-top: 60px;
+    --hero-title-margin-bottom: 48px;
+    --section-body-padding-y: 120px;
+    --footer-band-margin-top: 56px;
+  }
+
+  .section-row {
+    flex-direction: column;
+    gap: var(--stack-gap);
+    /* Reset the row-mode padding above — it would otherwise inset the
+       (now full-bleed) image too. __text gets its own padding on both
+       sides instead, below. */
+    padding-left: 0;
+  }
+
+  /* Same reset for hero's own row config (laptop's padding/gap divergence
+     doesn't apply once stacked — same specificity as the unconditional
+     rule above, so source order here makes it win). */
+  .section-row.section-row--hero {
+    padding-left: 0;
+    gap: var(--stack-gap);
+  }
+
+  .section-row__text,
+  .section-row__image,
+  .section-row__text.section-row__text--hero,
+  .section-row__image.section-row__image--hero {
+    flex: none;
+    width: 100%;
+  }
+
+  .section-row__text {
+    padding-left: var(--content-padding-x);
+    padding-right: var(--content-padding-x);
+  }
+}
+
+/* Mobile: margins step down again and the footer's two nav columns stack
+   instead of sitting side by side. */
+@media (max-width: 767px) {
+  :root {
+    --content-padding-x: 40px;
+    /* 60px: the reference's max gap at this size (hero's text→image gap
+       in the mobile frame) — smaller images here mean less parallax
+       drift in absolute px, so it doesn't need the full 80px. */
+    --stack-gap: 60px;
+    /* Same 5-column grid, but at this size both hero and body text wrap
+       at the same 4/5 line — unlike tablet, no hero/body split. Same vw
+       formula as the tablet block above (grid line + right padding, as
+       a proportion of viewport width, not a fixed px number). */
+    --row-text-max-width: calc(80vw + 40px);
+    --hero-text-max-width: calc(80vw + 40px);
+    --hero-title-size: 31.16px;
+    --hero-title-max-width: 262px;
+    --hero-title-margin-top: 40px;
+    --hero-title-margin-bottom: 40px;
+    --header-height: 60px;
+    --section-body-padding-y: 80px;
+    --footer-band-margin-top: 40px;
+  }
+
+  .footer-top__col {
+    flex-basis: 100%;
+  }
 }
