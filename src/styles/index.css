@@ -108,9 +108,24 @@ body {
   background: var(--color-bg);
   scroll-snap-align: start;
   /* Prevents a single fast fling from skipping past more than one
-     section at the mandatory tier above — each section gets its own
-     stop. Overridden back to `normal` at the proximity tier below. */
+     section at a time. Overridden back to `normal` at the tablet/mobile
+     breakpoint below, so a strong scroll there can sail past several
+     sections instead of hard-stopping at each one. */
   scroll-snap-stop: always;
+}
+
+/* The footer is the last section, and shorter than a full viewport at
+   most sizes — aligning its TOP edge to the viewport's top (like every
+   other section) asks the browser to scroll past the actual end of the
+   document, which isn't possible, so the snap target is unreachable.
+   Different browsers resolve an unreachable mandatory snap target
+   differently; the safe fix is to not need it to be reachable at all:
+   align the footer's BOTTOM edge to the viewport's bottom instead. That
+   target is always exactly the page's natural maximum scroll position
+   (document end), so it's guaranteed achievable, and it's what actually
+   reads as "flush to the bottom" with the whole footer visible. */
+.section[data-frame="4"] {
+  scroll-snap-align: end;
 }
 
 .placeholder {
@@ -497,6 +512,17 @@ body {
     scroll-snap-stop: normal;
   }
 
+  /* Top padding only — --section-body-padding-y (120px here) still governs
+     the bottom, unchanged. The reference tablet frame has "Before"/"Problem"
+     sitting at 80px from the section's own top edge; .info-block already
+     contributes 16px of that (its own padding-top, --text-rhythm-gap), so
+     the section itself only needs 80 − 16 = 64px above it. Using the full
+     120px for both top and bottom (as the desktop/laptop tiers do
+     symmetrically) overshot the top by 56px against the reference. */
+  .section--body {
+    padding-top: 64px;
+  }
+
   .section-row {
     flex-direction: column;
     gap: var(--stack-gap);
@@ -579,5 +605,14 @@ body {
      against reference until now. */
   .hero__tags {
     gap: 12px;
+  }
+
+  /* Same fix and same reasoning as the tablet block above: the reference
+     mobile frame also has "Before"/"Problem" at 80px from the section's
+     own top edge, and .info-block already accounts for 16px of that
+     (--text-rhythm-gap, its own padding-top) — 80 − 16 = 64px. Top only;
+     --section-body-padding-y (80px) still governs the bottom, unchanged. */
+  .section--body {
+    padding-top: 64px;
   }
 }
