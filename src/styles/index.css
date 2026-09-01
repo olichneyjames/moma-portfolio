@@ -469,15 +469,31 @@ body {
     --footer-band-margin-top: 56px;
   }
 
-  /* Downgrade from the mandatory tier above: proximity only pulls the
-     page into alignment when you release scroll near a section
-     boundary, so it stays free-scrolling for reading through a tall
-     stacked section on a smaller screen. */
+  /* `proximity` (the original choice here) turned out to fight touch
+     momentum scrolling badly in practice — on a section that's several
+     screens tall once stacked, "proximity" keeps continuously biasing
+     the deceleration toward the single distant snap point for most of
+     the scroll, not just at rest, which reads as constant notchy drag
+     rather than the free, springy momentum a touch scroll should have.
+     `mandatory` is the fix, somewhat counter-intuitively: it only
+     resolves once velocity has settled near zero, so momentum plays out
+     fully and untouched, then the scroll corrects to the nearest
+     section — combined with scroll-snap-stop: normal below, a fast
+     flick can still sail straight past several sections uninterrupted;
+     it's only the point where a scroll *comes to rest* that always
+     lands cleanly on a section top (one notch per page, never mid-page)
+     instead of wherever momentum happened to run out. */
   html {
-    scroll-snap-type: y proximity;
+    scroll-snap-type: y mandatory;
   }
 
   .section {
+    /* Without this, a fast fling could still be forced to a full stop
+       at every section it passes, one at a time (scroll-snap-stop's
+       `always`, inherited from the base .section rule above) — that's
+       the "too many notches" feel: normal lets a strong scroll skip
+       past intermediate sections and only commits once it's slowed
+       down near one. */
     scroll-snap-stop: normal;
   }
 
