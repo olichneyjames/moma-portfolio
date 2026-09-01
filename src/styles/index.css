@@ -29,6 +29,12 @@
   --hero-title-margin-bottom: 110px;
   --section-body-padding-y: 205px;
   --footer-band-margin-top: 91px;
+  /* Desktop/laptop/tablet share one footer image (1440:410). Mobile's
+     reference frame labels this image "mobile footer" — a distinct,
+     much less wide asset (390:266) — not just a scaled-down version, so
+     this needs to be a real breakpoint override, not a fixed prop. See
+     the 767px block below. */
+  --footer-band-aspect-ratio: 1440 / 410;
   --row-text-weight: 417;
   --row-image-weight: 864;
   /* Hard ceiling on the text column, on top of the flex weights above:
@@ -400,6 +406,13 @@ body {
   margin-top: var(--footer-band-margin-top);
 }
 
+/* Was a fixed aspectRatio prop on the <Placeholder> itself — an inline
+   style, which no breakpoint override could beat on specificity. Moved
+   to CSS so the mobile block below can actually change it. */
+.footer-band .placeholder {
+  aspect-ratio: var(--footer-band-aspect-ratio);
+}
+
 /* Breakpoints. Reference layouts (hand-built at these exact widths) live
    in the Figma file's "made by me" page — desktop 1440 / laptop 1024 /
    tablet 768 / mobile 390. Desktop is the :root default above. */
@@ -592,7 +605,28 @@ body {
     --hero-title-margin-bottom: 4px;
     --header-height: 60px;
     --section-body-padding-y: 80px;
-    --footer-band-margin-top: 40px;
+    /* 145px, not 40px — the mobile reference has real breathing room
+       between the stacked nav columns and the (differently-shaped, see
+       --footer-band-aspect-ratio below) footer image: 145px from the
+       bottom of "The Philadelphia Inquirer" column to the image's top. */
+    --footer-band-margin-top: 145px;
+    /* Distinct asset from the shared desktop/laptop/tablet footer image,
+       not a scaled copy — see the .footer-band .placeholder rule above. */
+    --footer-band-aspect-ratio: 390 / 266;
+  }
+
+  .footer-top {
+    /* 80px above "< New York Times Games", matching the same top-of-frame
+       offset already used for Before/Problem at this size (see below) —
+       the shared .footer-top rule has no padding-top at all, which only
+       happened to look right at tablet/desktop where "top" isn't stacked
+       this way. */
+    padding-top: 80px;
+    /* 100px between the two nav columns once they stack (flex-basis:100%
+       below turns the row's own `gap` into vertical spacing) — well over
+       the shared 40px, which was only ever tuned for the side-by-side
+       tablet/desktop layout. */
+    gap: 100px;
   }
 
   .footer-top__col {

@@ -25,7 +25,7 @@ export default function NextAndFooter() {
       </div>
 
       <div className="footer-band reveal">
-        <Placeholder aspectRatio="1440 / 410" label="footer" fontSize={91.789} />
+        <Placeholder label="footer" fontSize={91.789} />
       </div>
     </section>
   )
