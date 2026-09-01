@@ -50,6 +50,12 @@
   --hero-row-text-weight: 417;
   --hero-row-image-weight: 864;
   --hero-text-max-width: 416.67px;
+  /* Gap between the tags row and the copy block below it, inside the hero
+     text column. Defaults to matching --text-rhythm-gap (no evidence of a
+     desktop-specific hero value) but is NOT the same token — hero already
+     has its own distinct padding/gap/width at other tiers, and mobile is
+     a confirmed case where this one also diverges (see 767px override). */
+  --hero-tags-copy-gap: var(--text-rhythm-gap);
   /* 80px, not a smaller "in-between" value: the parallax drift on .placeholder
      images (±8% of their own height, see App.jsx) eats into whatever static
      gap sits between a stacked text block and its image, and at tablet's
@@ -170,6 +176,7 @@ body {
 .section-row__text.section-row__text--hero {
   flex: var(--hero-row-text-weight) var(--hero-row-text-weight) 0%;
   max-width: var(--hero-text-max-width);
+  gap: var(--hero-tags-copy-gap);
 }
 
 .section-row__image.section-row__image--hero {
@@ -230,8 +237,14 @@ body {
 }
 
 .hero__title {
-  margin: var(--hero-title-margin-top) var(--content-padding-x)
-    var(--hero-title-margin-bottom) var(--content-padding-x);
+  /* --hero-content-padding-x, not the general --content-padding-x: the
+     title needs to stay left-aligned with the hero row below it, and
+     that row uses its own padding token (diverges from the general one
+     at laptop — see the 1439px block). Using the wrong token here was
+     exactly what caused the title to sit 30px right of the tags/copy
+     column at laptop width. */
+  margin: var(--hero-title-margin-top) var(--hero-content-padding-x)
+    var(--hero-title-margin-bottom) var(--hero-content-padding-x);
   max-width: var(--hero-title-max-width);
   font-family: var(--font-display);
   font-weight: 700;
@@ -441,6 +454,11 @@ body {
 @media (max-width: 767px) {
   :root {
     --content-padding-x: 40px;
+    /* Reset explicitly — without this it would silently inherit 50px
+       from the laptop block above (nothing in the tablet block touches
+       it either, since tablet's own 50px happens to already match), and
+       the title would sit 10px right of the tags/copy column again. */
+    --hero-content-padding-x: 40px;
     /* 60px: the reference's max gap at this size (hero's text→image gap
        in the mobile frame) — smaller images here mean less parallax
        drift in absolute px, so it doesn't need the full 80px. */
@@ -451,7 +469,14 @@ body {
        a proportion of viewport width, not a fixed px number). */
     --row-text-max-width: calc(80vw + 40px);
     --hero-text-max-width: calc(80vw + 40px);
-    --hero-title-size: 31.16px;
+    /* Reference's own gap here (12px) is exactly half of desktop/laptop/
+       tablet's 24px — those never got exercised against reference before
+       since tags never wrap into a second row until mobile. */
+    --hero-tags-copy-gap: 30px;
+    /* Bumped up from the reference's exact 31.16px per explicit request
+       ("increase title size a bit") — not reference-matched like the rest
+       of this token set. */
+    --hero-title-size: 36px;
     --hero-title-max-width: 262px;
     --hero-title-margin-top: 40px;
     --hero-title-margin-bottom: 40px;
@@ -462,5 +487,13 @@ body {
 
   .footer-top__col {
     flex-basis: 100%;
+  }
+
+  /* Half of the 24px used everywhere else — reference-confirmed, both
+     between tags in a row and between wrapped rows (flex gap sets both).
+     Desktop/laptop/tablet never wrap tags, so this never got checked
+     against reference until now. */
+  .hero__tags {
+    gap: 12px;
   }
 }
