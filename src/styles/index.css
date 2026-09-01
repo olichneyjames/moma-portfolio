@@ -202,6 +202,34 @@ body {
   padding: var(--section-body-padding-y) 0;
 }
 
+/* Desktop/laptop only (matches the mandatory scroll-snap tier above):
+   each snapped-to section reads as one full "screen" of the reference
+   frame, so the row should sit centered in whatever extra vertical
+   space the viewport has beyond its own content — not pinned to the
+   top with only --section-body-padding-y above it. The padding above
+   still sets the floor (matches the reference spacing exactly at the
+   reference's own 1024px-tall viewport); on taller viewports the
+   surplus splits evenly above and below via justify-content: center.
+   scroll-snap-align also switches from the base .section rule's `start`
+   to `center` here — without that, the snap would still pin this
+   section's own TOP edge to the viewport's top regardless of how its
+   content is centered internally, so on a viewport shorter than the
+   section (image taller than the window) only the bottom would get cut
+   off. Centering the section itself in the viewport, on top of
+   centering the row inside the section, is what makes the overflow
+   symmetric too. Left untouched at tablet/mobile, where sections
+   routinely run longer than one screen once stacked and top-anchoring
+   reads better for scanning text top-down. */
+@media (min-width: 1024px) {
+  .section--body {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    scroll-snap-align: center;
+  }
+}
+
 /* Info block (label + copy) — shared by frames 2, 3, and future ones */
 .info-block {
   display: flex;
