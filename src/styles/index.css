@@ -441,6 +441,18 @@ body {
     --footer-band-margin-top: 56px;
   }
 
+  /* Downgrade from the mandatory tier above: proximity only pulls the
+     page into alignment when you release scroll near a section
+     boundary, so it stays free-scrolling for reading through a tall
+     stacked section on a smaller screen. */
+  html {
+    scroll-snap-type: y proximity;
+  }
+
+  .section {
+    scroll-snap-stop: normal;
+  }
+
   .section-row {
     flex-direction: column;
     gap: var(--stack-gap);
