@@ -78,6 +78,16 @@ body {
   color: var(--color-text);
 }
 
+/* Scroll-snap container. Strength is tiered by viewport — mandatory here
+   (desktop/laptop default), downgraded to proximity at the tablet/mobile
+   breakpoint below (max-width: 1023px). Mandatory guarantees every
+   scroll/fling lands exactly on a section; proximity only pulls the page
+   into alignment if you let go near a boundary, so it doesn't fight
+   normal reading scroll on smaller screens. */
+html {
+  scroll-snap-type: y mandatory;
+}
+
 body {
   font-family: var(--font-body);
   overflow-x: hidden;
@@ -96,6 +106,11 @@ body {
   position: relative;
   width: 100%;
   background: var(--color-bg);
+  scroll-snap-align: start;
+  /* Prevents a single fast fling from skipping past more than one
+     section at the mandatory tier above — each section gets its own
+     stop. Overridden back to `normal` at the proximity tier below. */
+  scroll-snap-stop: always;
 }
 
 .placeholder {
