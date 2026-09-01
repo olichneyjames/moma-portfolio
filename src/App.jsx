@@ -36,6 +36,22 @@ export default function App() {
       // Parallax: image placeholders drift a little slower than the page scroll,
       // scrubbed continuously to scroll position (not a one-shot reveal) so they
       // read as sitting slightly "behind" the surrounding text.
+      //
+      // The CSS gap above/below each image (row-gap, stack-gap) is set to match
+      // the Figma reference exactly, and that reference value is meant to be
+      // the *midpoint* of this animation, not just its resting state. Since
+      // scrub interpolates linearly between symmetric ±8% offsets, yPercent
+      // passes through 0 (no offset — the CSS gap applies untouched) exactly
+      // halfway through the scroll, landing the reference spacing at the
+      // midpoint automatically — true for either direction below, since
+      // reversing which end is +8 vs -8 doesn't change where the midpoint
+      // falls, only which way the image drifts. Kept at -8 → +8 (narrower
+      // gap at the start of the scroll, wider at the end) because that's
+      // what makes it read as "slower than the page" per the comment above:
+      // as you scroll down, the growing +yPercent partially cancels the
+      // image's own upward scroll motion, so it lags behind the text — the
+      // classic background-parallax feel. Reversing it would make the image
+      // drift faster than the scroll instead, a foreground-style effect.
       const parallaxEls = gsap.utils.toArray('.parallax')
       parallaxEls.forEach((el) => {
         gsap.fromTo(
