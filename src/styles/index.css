@@ -380,7 +380,13 @@ body {
     --hero-title-size: 68.94px;
     --hero-title-max-width: 739px;
     --hero-title-margin-top: 60px;
-    --hero-title-margin-bottom: 80px;
+    /* 93px, not 80px: this was an unverified guess from earlier in the
+       project. The title-bottom-to-tags-top gap is margin-bottom PLUS
+       the tags row's own padding-top (--text-rhythm-gap, 16px here) —
+       measured total gap is 109px, so margin-bottom is 109 − 16 = 93.
+       Only desktop's value (110px) had ever actually been decomposed
+       and checked this way before. */
+    --hero-title-margin-bottom: 93px;
     --header-height: 80px;
     --section-body-padding-y: 160px;
     --footer-band-margin-top: 70px;
@@ -413,7 +419,9 @@ body {
     --hero-title-size: 52.43px;
     --hero-title-max-width: 562px;
     --hero-title-margin-top: 60px;
-    --hero-title-margin-bottom: 48px;
+    /* 24px, not 48px — same fix as the laptop block above (measured gap
+       40px minus the tags row's own 16px padding-top). */
+    --hero-title-margin-bottom: 24px;
     --section-body-padding-y: 120px;
     --footer-band-margin-top: 56px;
   }
@@ -479,7 +487,12 @@ body {
     --hero-title-size: 36px;
     --hero-title-max-width: 262px;
     --hero-title-margin-top: 40px;
-    --hero-title-margin-bottom: 40px;
+    /* 4px, not 40px — same fix as laptop/tablet above, and by far the
+       biggest miss of the three: measured gap is only 20px total, and
+       16px of that is the tags row's own padding-top, leaving just 4px
+       of margin. The old 40px value made the title sit 36px too far
+       from the tags/copy below it at this size. */
+    --hero-title-margin-bottom: 4px;
     --header-height: 60px;
     --section-body-padding-y: 80px;
     --footer-band-margin-top: 40px;

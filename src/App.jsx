@@ -9,6 +9,15 @@ import NextAndFooter from './sections/NextAndFooter.jsx'
 
 gsap.registerPlugin(ScrollTrigger)
 
+// Mobile browsers fire `resize` constantly during scroll — the address
+// bar collapsing/expanding changes window.innerHeight without any real
+// layout change. Without this, the manual refresh below (and
+// ScrollTrigger's own internal resize handling) would recalculate every
+// trigger's start/end position mid-scroll, which is what was causing
+// scroll to visibly hitch or stop on phones. This tells ScrollTrigger to
+// ignore resize events that are just a height change on touch devices.
+ScrollTrigger.config({ ignoreMobileResize: true })
+
 export default function App() {
   const pageRef = useRef(null)
 
@@ -72,12 +81,6 @@ export default function App() {
     }, pageRef)
 
     return () => ctx.revert()
-  }, [])
-
-  useEffect(() => {
-    const handleResize = () => ScrollTrigger.refresh()
-    window.addEventListener('resize', handleResize)
-    return () => window.removeEventListener('resize', handleResize)
   }, [])
 
   return (
