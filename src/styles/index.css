@@ -217,6 +217,18 @@ body {
 
 .section-row__image.section-row__image--hero {
   flex: var(--hero-row-image-weight) var(--hero-row-image-weight) 0%;
+  /* A second scroll-snap notch inside Hero, beyond the section's own
+     top-anchored one: aligns the image's own BOTTOM edge to the
+     viewport's bottom (not centered), the same technique used for the
+     footer. Whenever the hero title + tags + copy + image add up to
+     more than one screen — routinely true, since the reference's own
+     hero frame is taller than most real browser windows — the first
+     notch alone leaves the image cut off at the bottom. This one lets
+     it settle fully in view before the next notch (Before/After). If a
+     viewport is tall enough that everything already fit at the first
+     notch, this target sits at (or before) that same scroll position,
+     so it doesn't add a meaningfully different stop. */
+  scroll-snap-align: end;
 }
 
 .section--body {
@@ -661,6 +673,16 @@ body {
      snap-jump rather than being scrolled into gradually — an animation
      keyed off ordinary scroll position doesn't survive that well. */
   .section[data-frame="4"] .reveal {
+    opacity: 1 !important;
+    transform: none !important;
+  }
+
+  /* Same reasoning and technique as the footer override above, for the
+     same reason: the hero image is now ALSO a scroll-snap point (see
+     scroll-snap-align: end above), so it too can arrive via an abrupt
+     snap-jump rather than a gradual scroll. Mobile only — tablet/
+     laptop/desktop keep the ordinary fade-in. */
+  .section-row__image--hero.reveal {
     opacity: 1 !important;
     transform: none !important;
   }
