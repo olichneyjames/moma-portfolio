@@ -615,19 +615,22 @@ body {
     --footer-band-aspect-ratio: 390 / 266;
   }
 
-  /* Not `start` (the plain .section default) either — opt the footer
-     out of scroll-snap entirely at this size, rather than swap which
-     edge it snaps to. Snapping to it at all forces an abrupt jump
-     straight to the resting position, which was cutting the .reveal
-     fade-in short (it triggers off ordinary scroll position, so it
-     needs to actually be scrolled INTO rather than snapped onto). With
-     no snap target here, scrolling past Problem's notch just continues
-     as normal free scroll into the footer, and --footer-top's own
-     padding-top above still guarantees the reference's whitespace above
-     "< New York Times Games" regardless of exactly where that scroll
-     happens to settle. */
+  /* `scroll-snap-align: none` here turned out to break scrolling
+     entirely: html's scroll-snap-type is `mandatory`, which requires
+     every resting scroll position to land on SOME snap point. With
+     Problem as the last one and nothing beyond it, mandatory had
+     nowhere further to go and refused to scroll past Problem at all.
+     Back to the plain .section default (start) — the footer needs to
+     stay a real snap point for mandatory to have anywhere to send you.
+     Its own top-anchored landing still shows the reference's whitespace
+     above "< New York Times Games" (--footer-top's padding-top below);
+     it's fine if the bottom of a footer this tall runs past the
+     viewport when snapped. (The .reveal fade-in issue this was meant to
+     fix is instead solved by removing .reveal from the footer content
+     entirely — see NextAndFooter.jsx — so it doesn't depend on how
+     abruptly the scroll arrives here.) */
   .section[data-frame="4"] {
-    scroll-snap-align: none;
+    scroll-snap-align: start;
   }
 
   .footer-top {
@@ -646,6 +649,20 @@ body {
 
   .footer-top__col {
     flex-basis: 100%;
+  }
+
+  /* Mobile only — tablet/laptop/desktop keep the ordinary .reveal
+     fade-in on the footer. GSAP sets opacity/transform as inline
+     styles, which normally beat a stylesheet rule; !important is what
+     lets this override win anyway, forcing the footer to render in its
+     already-arrived state regardless of what the (still-running,
+     harmlessly) ScrollTrigger tween is doing. This is the footer's
+     scroll-snap point on mobile, so it can arrive via an abrupt
+     snap-jump rather than being scrolled into gradually — an animation
+     keyed off ordinary scroll position doesn't survive that well. */
+  .section[data-frame="4"] .reveal {
+    opacity: 1 !important;
+    transform: none !important;
   }
 
   /* Half of the 24px used everywhere else — reference-confirmed, both
