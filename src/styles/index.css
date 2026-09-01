@@ -577,13 +577,6 @@ body {
     padding-left: var(--content-padding-x);
     padding-right: var(--content-padding-x);
   }
-
-  /* Tablet doesn't want the hero image's second snap notch (mobile and
-     desktop/laptop both do — this is tablet-only). Re-enabled again in
-     the 767px block below, so this covers exactly the tablet range. */
-  .section-row__image.section-row__image--hero {
-    scroll-snap-align: none;
-  }
 }
 
 /* Mobile: margins step down again and the footer's two nav columns stack
@@ -632,13 +625,6 @@ body {
     /* Distinct asset from the shared desktop/laptop/tablet footer image,
        not a scaled copy — see the .footer-band .placeholder rule above. */
     --footer-band-aspect-ratio: 390 / 266;
-  }
-
-  /* Re-enables the hero image's second snap notch, which the tablet
-     block above just turned off — mobile confirmed working well with
-     it, only tablet didn't want it. */
-  .section-row__image.section-row__image--hero {
-    scroll-snap-align: end;
   }
 
   /* `scroll-snap-align: none` here turned out to break scrolling
