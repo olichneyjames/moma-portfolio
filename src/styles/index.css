@@ -292,6 +292,10 @@ body {
   margin: 0 0 16px 0;
 }
 
+.body-copy__lead--spaced {
+  margin-top: 16px;
+}
+
 .body-copy__list {
   margin: 0;
   padding: 0;
