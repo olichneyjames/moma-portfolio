@@ -78,7 +78,7 @@ export const bodyFrames = {
           </li>
           <li>
             <span className="fw-semibold">Lack of Brand Delight</span> - if our brand
-            isn&rsquo;t fun, volunteers might choose to use other visual styles instead.
+            isn&rsquo;t fun, volunteers might use other visual styles instead.
           </li>
         </ol>
       </>
