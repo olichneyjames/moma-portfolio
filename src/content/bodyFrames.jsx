@@ -35,13 +35,16 @@ export const bodyFrames = {
     copy: (
       <>
         <p className="body-copy__lead">
-          The museum&rsquo;s online assets and physical signage used all sorts of colors, fonts,
-          and visual themes. This put off our visitors and would-be guests, who would love to
-          trust and visit our fun-loving game museum!
+          <span className="fw-semibold">
+            The museum&rsquo;s online assets and physical signage used all sorts of colors,
+            fonts, and visual themes.
+          </span>{' '}
+          This put off our visitors and would-be guests, who would love to trust and visit our
+          fun-loving game museum!
         </p>
         <p className="body-copy__lead">
-          After talking directly with museum volunteers who made the assets, I noted their
-          largest pain points:
+          After talking with museum volunteers who made the assets, I noted their largest pain
+          points:
         </p>
         <ol className="body-copy__list">
           <li>
