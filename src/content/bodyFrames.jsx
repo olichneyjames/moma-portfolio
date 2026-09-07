@@ -143,9 +143,11 @@ export const bodyFrames = {
     copy: (
       <>
         <p className="body-copy__lead">
-          I realize now that our volunteers used my work as a starting point. They didn&rsquo;t
-          need an exhaustive amount of Instagram templates; they needed me to start the work of
-          rebranding in more layouts and mediums.
+          <span className="fw-semibold">
+            I realize now that our volunteers used my work as a starting point.
+          </span>{' '}
+          They didn&rsquo;t need an exhaustive amount of Instagram templates; they needed me to
+          start the work of rebranding in more layouts and mediums.
         </p>
         <p className="body-copy__lead">
           If I could do this project over again, I&rsquo;d focus on starting to make our brand
