@@ -63,8 +63,8 @@ export const bodyFrames = {
     copy: (
       <>
         <p className="body-copy__lead">
-          After talking with museum volunteers who made the assets, I noted their largest pain
-          points:
+          After talking with the museum volunteers who made the assets, I noted what kept them
+          from sticking to a single brand language:
         </p>
         <ol className="body-copy__list">
           <li>
