@@ -125,9 +125,7 @@ export const bodyFrames = {
     copy: (
       <>
         <p className="body-copy__lead">
-          <span className="fw-semibold">
-            Now, 89% of new online posts are now high quality and on brand
-          </span>{' '}
+          <span className="fw-semibold">89% of new online posts are on brand and high quality</span>{' '}
           (up from 58% in the months before).
         </p>
         <p className="body-copy__lead">
