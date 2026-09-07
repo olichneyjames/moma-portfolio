@@ -12,7 +12,7 @@ export const bodyFrames = {
           The museum&rsquo;s physical and digital media assets varied widely in style and polish.
         </span>{' '}
         Using more than 10 different fonts and a wider range of colors, it was hard for
-        visitors to recognize our museum as a significant and fun loving institution.
+        visitors to recognize our museum as a significant and fun-loving institution.
       </>
     ),
   },
@@ -40,8 +40,9 @@ export const bodyFrames = {
             fonts, and visual themes.
           </span>{' '}
           This put off our visitors and would-be guests, who would love to trust and visit our
-          fun-loving game museum!
+          game museum!
         </p>
+        <p className="info-block__label">Insights</p>
         <p className="body-copy__lead">
           After talking with museum volunteers who made the assets, I noted their largest pain
           points:
@@ -57,8 +58,8 @@ export const bodyFrames = {
             in just minutes with brand recognition as a secondary priority.
           </li>
           <li>
-            <span className="fw-semibold">Lack of Vision and Brand Delight</span> - if our brand
-            isn&rsquo;t exciting, volunteers might choose to use other visual styles instead.
+            <span className="fw-semibold">Lack of Brand Delight</span> - if our brand
+            isn&rsquo;t fun, volunteers might choose to use other visual styles instead.
           </li>
         </ol>
       </>
