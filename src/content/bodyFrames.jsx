@@ -144,7 +144,7 @@ export const bodyFrames = {
       <>
         <p className="body-copy__lead">
           I realize now that our volunteers used my work as a starting point. They didn&rsquo;t
-          need an exhaustive amount of templates; they needed me to start the work of
+          need an exhaustive amount of Instagram templates; they needed me to start the work of
           rebranding in more layouts and mediums.
         </p>
         <p className="body-copy__lead">
