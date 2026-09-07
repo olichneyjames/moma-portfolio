@@ -44,12 +44,16 @@ export const bodyFrames = {
     label: 'Problem',
     copy: (
       <>
-        <span className="fw-semibold">
-          The museum&rsquo;s online assets and physical signage used all sorts of colors, fonts,
-          and visual themes.
-        </span>{' '}
-        This put off our visitors and would-be guests, who would love to trust and visit our
-        game museum!
+        <p className="body-copy__lead">
+          <span className="fw-semibold">
+            The museum&rsquo;s online assets and physical signage used all sorts of colors,
+            fonts, and visual themes.
+          </span>
+        </p>
+        <p className="body-copy__lead">
+          This put off our visitors and would-be guests, who would love to trust and visit our
+          game museum!
+        </p>
       </>
     ),
   },
