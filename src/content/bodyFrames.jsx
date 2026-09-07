@@ -84,4 +84,76 @@ export const bodyFrames = {
       </>
     ),
   },
+  solution1: {
+    id: 'solution1',
+    label: 'Making it Easy to Use',
+    copy: (
+      <>
+        <p className="body-copy__lead">
+          I defined our brand&rsquo;s use of type, color, etc. and paired it with materials from
+          distant Slack group chats and Google Docs to create a definitive set of brand
+          guidelines.
+        </p>
+        <p className="body-copy__lead">
+          I also made social media asset templates along with a quick start guide to help
+          volunteers use our new brand in no time!
+        </p>
+      </>
+    ),
+  },
+  solution2: {
+    id: 'solution2',
+    label: 'Making it Fun',
+    copy: (
+      <>
+        <p className="body-copy__lead">
+          Our brand had to be fun for our visitors and fun for the volunteers using it.
+        </p>
+        <p className="body-copy__lead">
+          I made sure to include bold visual brand examples throughout the book to get
+          volunteers excited about our brand. (Section title pages are especially great places
+          to get creative!)
+        </p>
+      </>
+    ),
+  },
+  results: {
+    id: 'results',
+    label: 'Results',
+    copy: (
+      <>
+        <p className="body-copy__lead">
+          <span className="fw-semibold">
+            Now, 89% of new online posts are now high quality and on brand
+          </span>{' '}
+          (up from 58% in the months before).
+        </p>
+        <p className="body-copy__lead">
+          With our new brand in place, visitors see our museum as a fun place to spend a
+          Saturday and learn about video game history.
+        </p>
+      </>
+    ),
+  },
+  reflection: {
+    id: 'reflection',
+    label: 'Reflection',
+    copy: (
+      <>
+        <p className="body-copy__lead">
+          <span className="fw-semibold">Designing for the Real World.</span>
+        </p>
+        <p className="body-copy__lead">
+          I realize now that our volunteers used my work as a starting point. They didn&rsquo;t
+          need an exhaustive amount of templates; they needed me to start the work of
+          rebranding in more layouts and mediums.
+        </p>
+        <p className="body-copy__lead">
+          If I could do this project over again, I&rsquo;d focus on starting to make our brand
+          work for all the museum&rsquo;s most critical assets and mediums rather than
+          exhaustively &ldquo;solving&rdquo; how our brand would work for a few of them.
+        </p>
+      </>
+    ),
+  },
 }

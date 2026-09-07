@@ -6,6 +6,10 @@ import Hero from './sections/Hero.jsx'
 import BeforeAfter from './sections/BeforeAfter.jsx'
 import Problem from './sections/Problem.jsx'
 import Insights from './sections/Insights.jsx'
+import Solution1 from './sections/Solution1.jsx'
+import Solution2 from './sections/Solution2.jsx'
+import Results from './sections/Results.jsx'
+import Reflection from './sections/Reflection.jsx'
 import NextAndFooter from './sections/NextAndFooter.jsx'
 
 gsap.registerPlugin(ScrollTrigger)
@@ -90,6 +94,10 @@ export default function App() {
       <BeforeAfter />
       <Problem />
       <Insights />
+      <Solution1 />
+      <Solution2 />
+      <Results />
+      <Reflection />
       <NextAndFooter />
     </div>
   )
