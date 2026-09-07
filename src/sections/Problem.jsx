@@ -3,13 +3,14 @@ import Placeholder from '../components/Placeholder.jsx'
 import { bodyFrames } from '../content/bodyFrames.jsx'
 
 export default function Problem() {
-  const { problem } = bodyFrames
+  const { problem, insights } = bodyFrames
 
   return (
     <section className="frame section section--body" data-frame="3">
       <div className="section-row">
         <div className="section-row__text">
           <BodyFrame label={problem.label} copy={problem.copy} />
+          <BodyFrame label={insights.label} copy={insights.copy} />
         </div>
 
         <div className="section-row__image reveal">

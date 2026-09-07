@@ -34,15 +34,20 @@ export const bodyFrames = {
     label: 'Problem',
     copy: (
       <>
-        <p className="body-copy__lead">
-          <span className="fw-semibold">
-            The museum&rsquo;s online assets and physical signage used all sorts of colors,
-            fonts, and visual themes.
-          </span>{' '}
-          This put off our visitors and would-be guests, who would love to trust and visit our
-          game museum!
-        </p>
-        <p className="info-block__label">Insights</p>
+        <span className="fw-semibold">
+          The museum&rsquo;s online assets and physical signage used all sorts of colors, fonts,
+          and visual themes.
+        </span>{' '}
+        This put off our visitors and would-be guests, who would love to trust and visit our
+        game museum!
+      </>
+    ),
+  },
+  insights: {
+    id: 'insights',
+    label: 'Insights',
+    copy: (
+      <>
         <p className="body-copy__lead">
           After talking with museum volunteers who made the assets, I noted their largest pain
           points:
