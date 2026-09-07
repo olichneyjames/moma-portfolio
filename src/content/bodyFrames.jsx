@@ -8,11 +8,16 @@ export const bodyFrames = {
     label: 'Before',
     copy: (
       <>
-        <span className="fw-semibold">
-          The museum&rsquo;s physical and digital media assets varied widely in style and polish.
-        </span>{' '}
-        Using more than 10 different fonts and a wider range of colors, it was hard for
-        visitors to recognize our museum as a significant and fun-loving institution.
+        <p className="body-copy__lead">
+          <span className="fw-semibold">
+            The museum&rsquo;s physical and digital media assets varied widely in style and
+            polish.
+          </span>
+        </p>
+        <p className="body-copy__lead">
+          Using more than 10 different fonts and a wider range of colors, it was hard for
+          visitors to recognize our museum as a significant and fun-loving institution.
+        </p>
       </>
     ),
   },
@@ -21,11 +26,16 @@ export const bodyFrames = {
     label: 'After',
     copy: (
       <>
-        <span className="fw-semibold">
-          Using my new brand book, 89% of new online posts are now high quality and on brand
-        </span>{' '}
-        (up from 58% in the months before). Now guests and online viewers can spot our playful
-        and educational mission from just a glance.
+        <p className="body-copy__lead">
+          <span className="fw-semibold">
+            Using my new brand book, 89% of new online posts are now high quality and on brand
+          </span>{' '}
+          (up from 58% in the months before).
+        </p>
+        <p className="body-copy__lead">
+          Now guests and online viewers can spot our playful and educational mission from just a
+          glance.
+        </p>
       </>
     ),
   },
