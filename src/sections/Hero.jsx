@@ -1,4 +1,5 @@
 import Placeholder from '../components/Placeholder.jsx'
+import heroCover from '../assets/hero-cover.png'
 
 export default function Hero() {
   return (
@@ -47,7 +48,7 @@ export default function Hero() {
         </div>
 
         <div className="section-row__image section-row__image--hero reveal">
-          <Placeholder aspectRatio="864 / 512" label="image cover" parallax />
+          <Placeholder aspectRatio="864 / 512" label="image cover" parallax src={heroCover} />
         </div>
       </div>
     </section>
