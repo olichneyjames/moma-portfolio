@@ -134,9 +134,7 @@ export const bodyFrames = {
           With our new brand in place, visitors see our museum as a fun place to spend a
           Saturday and learn about video game history.
         </p>
-        <p className="body-copy__lead body-copy__lead--spaced">
-          Click here to access the final brand book
-        </p>
+        <p className="body-copy__lead">Click here to access the final brand book</p>
       </>
     ),
   },
