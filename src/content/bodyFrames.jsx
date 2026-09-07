@@ -11,8 +11,8 @@ export const bodyFrames = {
         <span className="fw-semibold">
           The museum&rsquo;s physical and digital media assets varied widely in style and polish.
         </span>{' '}
-        Using more than 10 different fonts and a wider range of colors, it was difficult for
-        visitors to learn what the museum was all about.
+        Using more than 10 different fonts and a wider range of colors, it was hard for
+        visitors to recognize our museum as a significant and fun loving institution.
       </>
     ),
   },
@@ -22,10 +22,10 @@ export const bodyFrames = {
     copy: (
       <>
         <span className="fw-semibold">
-          Now, 89% of new online posts are high quality and on brand
+          Using my new brand book, 89% of new online posts are now high quality and on brand
         </span>{' '}
-        (up from 58% in the months before). The codified brand book improved our communication
-        efficacy and asset quality.
+        (up from 58% in the months before). Now guests and online viewers can spot our playful
+        and educational mission from just a glance.
       </>
     ),
   },
@@ -35,21 +35,27 @@ export const bodyFrames = {
     copy: (
       <>
         <p className="body-copy__lead">
-          After talking to museum volunteers, I learned that they were struggling to make branded
-          content due to:
+          The museum&rsquo;s online assets and physical signage used all sorts of colors, fonts,
+          and visual themes. This put off our visitors and would-be guests, who would love to
+          trust and visit our fun-loving game museum!
+        </p>
+        <p className="body-copy__lead">
+          After talking directly with museum volunteers who made the assets, I noted their
+          largest pain points:
         </p>
         <ol className="body-copy__list">
           <li>
-            <span className="fw-semibold">An Undefined Brand</span> - volunteers don&rsquo;t know
-            what our brand is about and how to recreate it.
+            <span className="fw-semibold">Lack of Codification</span> - our brand wasn&rsquo;t
+            codified and the few materials about it were scattered in different unrelated
+            folders and group chats.
           </li>
           <li>
-            <span className="fw-semibold">Time Constraints</span> - volunteers are busy doing
-            other responsibilities, so most museum signage is made in a matter of minutes.
+            <span className="fw-semibold">Time Constraints</span> - most museum signage is made
+            in just minutes with brand recognition as a secondary priority.
           </li>
           <li>
-            <span className="fw-semibold">Little Brand Excitement</span> - if our brand
-            isn&rsquo;t exciting, volunteers might choose other visual styles instead.
+            <span className="fw-semibold">Lack of Vision and Brand Delight</span> - if our brand
+            isn&rsquo;t exciting, volunteers might choose to use other visual styles instead.
           </li>
         </ol>
       </>

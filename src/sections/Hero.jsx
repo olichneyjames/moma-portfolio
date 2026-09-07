@@ -38,9 +38,8 @@ export default function Hero() {
               <span className="fw-semibold">
                 I designed the museum&rsquo;s current official brand system and brand book.
               </span>{' '}
-              While the museum had a vague visual preference, we delivered a needed centralized
-              resource that would excite volunteers and unify new signage under a single playful
-              visual language.
+              I transformed the museum&rsquo;s vague visual preference into a playful and
+              centralized visual language.
             </p>
             <p>August - September 2025</p>
             <p>Collaborator: Design Mentor - Andrew Watterson</p>
