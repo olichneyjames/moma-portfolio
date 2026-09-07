@@ -111,8 +111,10 @@ export const bodyFrames = {
         </p>
         <p className="body-copy__lead">
           I made sure to include bold visual brand examples throughout the book to get
-          volunteers excited about our brand. (Section title pages are especially great places
-          to get creative!)
+          volunteers excited about our brand.
+        </p>
+        <p className="body-copy__lead">
+          (Section title pages are especially great places to get creative!)
         </p>
       </>
     ),
