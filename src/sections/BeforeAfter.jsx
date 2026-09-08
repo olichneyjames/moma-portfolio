@@ -1,6 +1,7 @@
 import BodyFrame from '../components/BodyFrame.jsx'
 import Placeholder from '../components/Placeholder.jsx'
 import { bodyFrames } from '../content/bodyFrames.jsx'
+import image2 from '../assets/image-2.png'
 
 export default function BeforeAfter() {
   const { before, after } = bodyFrames
@@ -14,7 +15,7 @@ export default function BeforeAfter() {
         </div>
 
         <div className="section-row__image reveal">
-          <Placeholder aspectRatio="864 / 614" label="image 2" parallax />
+          <Placeholder aspectRatio="864 / 614" label="image 2" parallax src={image2} />
         </div>
       </div>
     </section>
