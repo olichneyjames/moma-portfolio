@@ -1,7 +1,7 @@
 import { useEffect, useRef } from 'react'
 import gsap from 'gsap'
 import { ScrollTrigger } from 'gsap/ScrollTrigger'
-import Lenis from 'lenis'
+import { ScrollToPlugin } from 'gsap/ScrollToPlugin'
 
 import Hero from './sections/Hero.jsx'
 import BeforeAfter from './sections/BeforeAfter.jsx'
@@ -13,26 +13,51 @@ import Results from './sections/Results.jsx'
 import Reflection from './sections/Reflection.jsx'
 import NextAndFooter from './sections/NextAndFooter.jsx'
 
-gsap.registerPlugin(ScrollTrigger)
+gsap.registerPlugin(ScrollTrigger, ScrollToPlugin)
 
 // Chrome's mandatory scroll-snap feels noticeably rougher than Safari's —
 // Safari ties snap into macOS's native inertial scrolling, so a flick's
-// momentum can never overshoot past a snap point; Chrome's compositor-driven
-// smooth-scroll has no such tie, so a strong flick (or its OS-synthesized
-// momentum tail) just glides straight through every section. Nothing in
-// native CSS scroll-snap resolves this (proximity, dropping
-// scroll-snap-stop, a homegrown JS wheel/scrollend approximation, and the
-// Lenis library's own Snap plugin were all tried and all still let a single
-// flick blow through multiple sections — see the comment on the effect
-// below for exactly why). The actual fix is Lenis
-// (https://github.com/darkroomengineering/lenis) as the *only* thing
-// driving scroll, animating exactly one section per wheel gesture ourselves.
+// momentum decays and settles into a section as one continuous motion;
+// Chrome's compositor-driven smooth-scroll has no such tie, so native snap
+// there either fights an in-progress scroll or, once disabled, does nothing
+// at all. Several hand-rolled JS approximations were tried for wheel input
+// specifically — forcing scroll into discrete counted steps with a lock
+// spanning the whole landing (read as a "forced slideshow"), then a version
+// where the lock was shorter than the landing so a second flick could
+// interrupt it (which meant a single flick's own momentum tail, being
+// indistinguishable from a second deliberate flick, could sneak through and
+// get counted as one) — each fixing one problem while reintroducing the
+// other, because neither version looked at *how* a wheel event related to
+// the one before it, only at time elapsed. The actual fix, adapted from a
+// small open-source library built for exactly this
+// (https://github.com/LinardsLiepenieks/react-scroll-snap-momentum):
+// classify each wheel event individually — fast timing + same direction +
+// non-increasing delta vs. the previous event reads as "still the same
+// momentum tail", anything else reads as "a fresh, intentional push" — and
+// give momentum-classified events a long cooldown before the next section
+// change is allowed, but intentional-looking ones a short one. See the
+// comment on the wheel effect below for the full mechanics. A lone mouse
+// wheel notch and a deliberate second trackpad flick both naturally read as
+// "intentional" under this test (neither has a decaying predecessor to
+// compare against), so this one algorithm handles both input types
+// correctly without needing to separately detect which device sent it —
+// there's no reliable browser API for that anyway.
+//
+// Touch is a different problem: once you lift your finger, the native
+// "fling" that follows is animated entirely by the OS/browser compositor
+// with no further touch events at all, so there's no stream to classify the
+// way there is with wheel events — it's a black box while in flight. So
+// touch instead keeps native scrolling (real fling, completely untouched)
+// and only uses GSAP ScrollTrigger's own built-in `snap` feature to ease
+// into the nearest section once it settles — see the comment on the touch
+// effect below.
+//
 // There's no CSS feature query that tells Chrome and Safari apart (both
 // support the same snap properties), so this is a plain UA sniff: Chrome
 // gets native snap turned off (see the
 // `@media (pointer: fine) { html.is-chromium { scroll-snap-type: none } }`
-// rule in index.css) in favor of the Lenis-driven paginator below. Safari
-// keeps the native CSS snap entirely untouched.
+// rule in index.css) in favor of the controllers below. Safari keeps the
+// native CSS snap entirely untouched.
 const ua = navigator.userAgent
 const isChromium = /Chrome|Chromium/.test(ua) && !/Edg|OPR/.test(ua)
 document.documentElement.classList.toggle('is-chromium', isChromium)
@@ -41,16 +66,19 @@ document.documentElement.classList.toggle('is-chromium', isChromium)
 // (and this whole problem) require one, and a resized-narrow desktop Chrome
 // window has one just as much as a full-width one — someone previewing the
 // tablet/mobile CSS tiers by shrinking their own browser window is still
-// scrolling with a trackpad, not a finger. A real touchscreen phone/tablet
-// (`pointer: coarse`) never fires wheel events at all regardless of width,
-// so this stays inert there and native mandatory-snap (tuned separately
-// for touch momentum in index.css) is untouched.
+// scrolling with a trackpad, not a finger.
 const FINE_POINTER_QUERY = '(pointer: fine)'
+// A real touchscreen phone/tablet never fires wheel events at all, so the
+// wheel controller above stays inert there regardless of width — this is
+// its own separate query (not just "not fine") so a device with neither
+// (rare, but possible) doesn't accidentally match either.
+const COARSE_POINTER_QUERY = '(pointer: coarse)'
 
 // One page-stop per top-level `.section`, aligned start/center/end to
 // mirror the same CSS rule each section uses natively in index.css —
 // including the width thresholds at which those rules themselves change
-// (`.section--body`'s `center` align only exists at >=1024px; `end` for
+// (`.section--body`'s `center` align only exists at >=1024px, where the
+// whitespace is meant to sandwich the content above and below; `end` for
 // data-frame 4 only exists at >=768px), since this runs at whatever width
 // the browser window currently is, not just desktop. (An earlier version
 // also added the hero image's own bottom edge as an extra stop, mirroring
@@ -148,151 +176,199 @@ export default function App() {
     return () => ctx.revert()
   }, [])
 
-  // Chrome wheel-driven paginated scroll (see the comment block above).
-  // Scoped to `isChromium && matches(FINE_POINTER_QUERY)`, and re-evaluated
-  // whenever that flips — e.g. a Bluetooth trackpad connecting/disconnecting
-  // mid-session — so control hands back to native CSS snap cleanly.
+  // Chrome + touch (pointer: coarse): native scroll (real OS fling,
+  // completely untouched) plus GSAP ScrollTrigger's own built-in `snap` to
+  // ease into the nearest section once it settles — see the comment block
+  // above for why touch gets this instead of the wheel controller below.
+  // Re-evaluated whenever the pointer query flips so control hands back to
+  // native CSS snap cleanly (e.g. this same Chrome instance later opened on
+  // a device with a mouse instead).
   useEffect(() => {
     if (!isChromium) return
 
-    const mediaQuery = window.matchMedia(FINE_POINTER_QUERY)
-    let lenis = null
-    let onLenisScroll = null
-    let onTick = null
-    let onWheelCapture = null
-    let onResize = null
+    const mediaQuery = window.matchMedia(COARSE_POINTER_QUERY)
+    let trigger = null
 
-    // Why lerp/wheelMultiplier tuning, and then the Lenis Snap plugin,
-    // both failed to fix this: Lenis's own core loop follows *every* wheel
-    // event's delta in real time (`onVirtualScroll` calls
-    // `scrollTo(targetScroll + delta, ...)` on each one). The Snap plugin
-    // only does a single corrective "snap to nearest" jump *after* the
-    // whole wheel/momentum stream has gone idle — so no matter how heavily
-    // damped that per-event follow was, a single flick's full momentum
-    // tail (which macOS/Chrome keeps synthesizing for a second or more
-    // after you lift your fingers) was always free to keep accumulating
-    // and carry the real scroll position through many sections before Snap
-    // ever got a chance to intervene. A later attempt drove `snap.next()`/
-    // `previous()` directly off our own wheel handler instead of Snap's own
-    // debounced trigger, which fixed *that* problem — but Snap's own point
-    // list also includes an extra stop for the hero image's bottom edge
-    // (mirroring a real snap point in the CSS), so the very first "next
-    // page" step from the top landed on that in-between point instead of
-    // the actual next section, which is what made it look broken.
-    //
-    // This version fixes both: wheel input never drives scroll position
-    // directly (every event is neutralized — deltaY forced to 0, native
-    // scroll prevented — before Lenis ever sees it), and the only stops are
-    // the actual top-level `.section` elements (`getSectionTargets`, no
-    // extra in-between points). A wheel nudge past WHEEL_THRESHOLD moves
-    // exactly one section via Lenis's normal eased `scrollTo`; while that's
-    // in flight (`isStepLocked`), every further wheel event — including a
-    // flick's entire decaying momentum tail — is discarded outright, so one
-    // continuous gesture can only ever complete one section transition.
-    // Lifting your fingers and pushing again (or just continuing to scroll
-    // once the lock clears) fires the next step, so working through several
-    // sections via sustained/repeated input still reads as "quick".
-    const WHEEL_THRESHOLD = 12
-    const WHEEL_IDLE_MS = 150
-    const STEP_DURATION = 1.1
-    const stepEasing = (t) => 1 - Math.pow(1 - t, 4)
-    let wheelAccum = 0
-    let idleTimer = null
-    let isStepLocked = false
-    let currentIndex = 0
+    const setup = () => {
+      // No wrapper, no touch listener, no custom physics — this is a plain
+      // ScrollTrigger spanning the whole scrollable page, whose only job is
+      // its own `snap` config. `end` as a function (not a fixed number) so
+      // ScrollTrigger's own refresh-on-resize keeps it correct as content
+      // reflows. Everything about *how scrolling feels* while it's actually
+      // moving is just the browser's real native fling — untouched.
+      trigger = ScrollTrigger.create({
+        start: 0,
+        end: () => document.documentElement.scrollHeight - window.innerHeight,
 
-    const nearestIndex = (targets, scroll) => {
-      let nearest = 0
-      let nearestDistance = Infinity
-      targets.forEach((value, index) => {
-        const distance = Math.abs(value - scroll)
-        if (distance < nearestDistance) {
-          nearestDistance = distance
-          nearest = index
-        }
-      })
-      return nearest
-    }
-
-    const step = (direction) => {
-      const targets = getSectionTargets()
-      const nextIndex = Math.max(0, Math.min(currentIndex + direction, targets.length - 1))
-      if (nextIndex === currentIndex) return
-      currentIndex = nextIndex
-      isStepLocked = true
-      lenis.scrollTo(targets[nextIndex], {
-        duration: STEP_DURATION,
-        easing: stepEasing,
-        lock: true,
-        onComplete: () => {
-          isStepLocked = false
+        snap: {
+          // snapTo gets ScrollTrigger's own current progress (0-1) and
+          // returns the progress to snap to — translate to/from pixels
+          // ourselves since our stops (getSectionTargets) aren't evenly
+          // spaced. Recomputed on every call rather than cached, so it's
+          // always right after a resize or a layout shift (e.g. an image
+          // finishing loading).
+          snapTo: (progress) => {
+            const maxScroll = document.documentElement.scrollHeight - window.innerHeight
+            if (maxScroll <= 0) return progress
+            const scroll = progress * maxScroll
+            const targets = getSectionTargets()
+            let nearest = targets[0] ?? 0
+            let nearestDistance = Infinity
+            targets.forEach((value) => {
+              const distance = Math.abs(value - scroll)
+              if (distance < nearestDistance) {
+                nearestDistance = distance
+                nearest = value
+              }
+            })
+            return nearest / maxScroll
+          },
+          // Velocity-scaled: a barely-moving stop lands quickly, a fast
+          // flick gets more time to ease down rather than snapping abruptly
+          // out of real momentum.
+          duration: { min: 0.35, max: 0.9 },
+          // How long to wait after scrolling stops before easing in — long
+          // enough that it never reads as cutting a swipe's momentum tail
+          // short. Cancels and restarts automatically if you scroll again
+          // before it fires (ScrollTrigger's own behavior, not something
+          // handled here).
+          delay: 0.15,
+          ease: 'power2.out',
         },
       })
     }
 
+    const teardown = () => {
+      trigger?.kill()
+      trigger = null
+    }
+
+    const sync = () => {
+      teardown()
+      if (mediaQuery.matches) setup()
+    }
+
+    sync()
+    mediaQuery.addEventListener('change', sync)
+    return () => {
+      mediaQuery.removeEventListener('change', sync)
+      teardown()
+    }
+  }, [])
+
+  // Chrome + mouse/trackpad (pointer: fine): one section per wheel gesture,
+  // with a slow, deliberate landing — the momentum-classification algorithm
+  // from the comment block above, adapted from
+  // https://github.com/LinardsLiepenieks/react-scroll-snap-momentum.
+  //
+  // Every wheel event is classified individually against the one before it:
+  // fast timing (less than MOMENTUM_GAP_MS since the last event), the same
+  // direction as that last event, and a delta that hasn't grown — all three
+  // together mean "this is still the same physical gesture's decaying
+  // momentum tail", not a fresh push. A momentum-classified event has to
+  // wait out MOMENTUM_COOLDOWN_MS since the last section change before it's
+  // allowed to trigger another one (long enough to reliably outlast a real
+  // trackpad momentum tail); an intentional-looking one only has to wait out
+  // the much shorter NORMAL_COOLDOWN_MS. A lone mouse notch and a genuinely
+  // separate second flick both read as "intentional" under this test (there
+  // being no decaying predecessor to compare against right after a pause),
+  // so both get the short cooldown — this is what lets "flick, flick, flick"
+  // chain through pages while a single hard flick's own tail still can't.
+  useEffect(() => {
+    if (!isChromium) return
+
+    const mediaQuery = window.matchMedia(FINE_POINTER_QUERY)
+    let onWheel = null
+
+    const MOMENTUM_GAP_MS = 1500
+    const MIN_DELTA = 4 // filters trackpad noise / micro-movements
+    const NORMAL_COOLDOWN_MS = 550
+    const MOMENTUM_COOLDOWN_MS = 1300
+    // "Sink into the next page": slow and heavily eased, not snappy.
+    const LAND_DURATION = 0.55
+    // "Pulse" — Michael Herf's easing curve from the classic SmoothScroll
+    // Chrome extension (https://github.com/gblazex/smoothscroll,
+    // http://stereopsis.com/stopping/): a fixed-force acceleration phase
+    // for the first 1/pulseScale of the curve, then a viscous exponential
+    // drag for the rest — tuned by ear, over years, in a 150,000-user
+    // extension, specifically for what a wheel-driven scroll deceleration
+    // should feel like, rather than a generic UI-transition curve like
+    // power2/power3. pulseScale controls how much of the curve is the
+    // initial push vs. the drag; normalized so the curve always lands
+    // exactly on 1 at t=1 regardless of that scale.
+    const PULSE_SCALE = 4
+    const pulseRaw = (t) => {
+      const x = t * PULSE_SCALE
+      if (x < 1) return x - (1 - Math.exp(-x))
+      const start = Math.exp(-1)
+      const tail = 1 - Math.exp(-(x - 1))
+      return start + tail * (1 - start)
+    }
+    const pulseNormalize = 1 / pulseRaw(1)
+    const landEase = (t) => (t <= 0 ? 0 : t >= 1 ? 1 : pulseRaw(t) * pulseNormalize)
+
+    let lastEventDelta = 0
+    let lastEventDirection = 0
+    let lastEventAt = 0
+    let lastStepAt = 0
+    let isLanding = false
+
     const setup = () => {
-      lenis = new Lenis()
-      currentIndex = nearestIndex(getSectionTargets(), window.scrollY)
+      onWheel = (event) => {
+        event.preventDefault() // we own scrolling entirely here, same as every version before
 
-      onLenisScroll = () => {
-        ScrollTrigger.update()
-        // Resync if the page moved by some means other than our own wheel
-        // handler (scrollbar drag, keyboard PageDown/End) so the next
-        // wheel-driven step still moves from the section actually on screen.
-        if (!isStepLocked) currentIndex = nearestIndex(getSectionTargets(), lenis.scroll)
+        const now = performance.now()
+        const delta = Math.abs(event.deltaY)
+        const direction = Math.sign(event.deltaY)
+        if (delta < MIN_DELTA) return
+
+        const gapMs = now - lastEventAt
+        const isMomentum =
+          lastEventDirection !== 0 &&
+          gapMs < MOMENTUM_GAP_MS &&
+          direction === lastEventDirection &&
+          delta <= lastEventDelta
+
+        lastEventDelta = delta
+        lastEventDirection = direction
+        lastEventAt = now
+
+        if (isLanding) return
+        const cooldown = isMomentum ? MOMENTUM_COOLDOWN_MS : NORMAL_COOLDOWN_MS
+        if (now - lastStepAt < cooldown) return
+
+        const targets = getSectionTargets()
+        const current = window.scrollY
+        let currentIndex = 0
+        let currentDistance = Infinity
+        targets.forEach((value, index) => {
+          const distance = Math.abs(value - current)
+          if (distance < currentDistance) {
+            currentDistance = distance
+            currentIndex = index
+          }
+        })
+        const nextIndex = Math.max(0, Math.min(currentIndex + direction, targets.length - 1))
+        if (nextIndex === currentIndex && currentDistance < 2) return
+
+        lastStepAt = now
+        isLanding = true
+        gsap.to(window, {
+          scrollTo: { y: targets[nextIndex] },
+          duration: LAND_DURATION,
+          ease: landEase,
+          onComplete: () => {
+            isLanding = false
+          },
+        })
       }
-      lenis.on('scroll', onLenisScroll)
-
-      onTick = (time) => lenis.raf(time * 1000)
-      gsap.ticker.add(onTick)
-      gsap.ticker.lagSmoothing(0)
-
-      onWheelCapture = (event) => {
-        // We fully own wheel-driven scrolling now — always suppress the
-        // browser's native scroll, and always neutralize the event for
-        // Lenis's own listener downstream (bubble phase), whether or not
-        // this particular event ends up triggering a step. Read the raw
-        // value first — the override below replaces it for everyone else.
-        const rawDeltaY = event.deltaY
-        event.preventDefault()
-        Object.defineProperty(event, 'deltaY', { value: 0, configurable: true })
-
-        if (isStepLocked) return // discard the rest of this flick's momentum tail
-
-        wheelAccum += rawDeltaY
-        clearTimeout(idleTimer)
-        idleTimer = setTimeout(() => {
-          wheelAccum = 0
-        }, WHEEL_IDLE_MS)
-
-        if (Math.abs(wheelAccum) > WHEEL_THRESHOLD) {
-          const direction = wheelAccum > 0 ? 1 : -1
-          wheelAccum = 0
-          step(direction)
-        }
-      }
-      window.addEventListener('wheel', onWheelCapture, { capture: true, passive: false })
-
-      // Keep our notion of "current section" in sync with wherever the page
-      // actually is if it moves by some means other than our own wheel
-      // handler (scrollbar drag, keyboard PageDown/End) — a resize can also
-      // shift where each section's target lands.
-      onResize = () => {
-        if (!isStepLocked) currentIndex = nearestIndex(getSectionTargets(), window.scrollY)
-      }
-      window.addEventListener('resize', onResize)
+      window.addEventListener('wheel', onWheel, { passive: false })
     }
 
     const teardown = () => {
-      if (onWheelCapture) window.removeEventListener('wheel', onWheelCapture, { capture: true })
-      if (onResize) window.removeEventListener('resize', onResize)
-      clearTimeout(idleTimer)
-      wheelAccum = 0
-      isStepLocked = false
-      if (onTick) gsap.ticker.remove(onTick)
-      if (lenis && onLenisScroll) lenis.off('scroll', onLenisScroll)
-      lenis?.destroy()
-      lenis = null
+      if (onWheel) window.removeEventListener('wheel', onWheel)
+      onWheel = null
+      isLanding = false
     }
 
     const sync = () => {
