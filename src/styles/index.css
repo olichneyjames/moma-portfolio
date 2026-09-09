@@ -120,6 +120,24 @@ body {
   scroll-snap-stop: always;
 }
 
+/* Chrome-only override (see the UA sniff + wheel-driven paginator in
+   App.jsx): native mandatory snap is what fights Chrome's own
+   compositor-driven smooth-scroll and lets a flick's momentum sail past
+   several sections before it settles — the JS controller replaces it with
+   exactly one section per wheel gesture instead. Gated on `(pointer: fine)`
+   rather than a width breakpoint: a mouse/trackpad is what wheel events
+   (and this whole problem) require, and that's true of a resized-narrow
+   desktop Chrome window just as much as a full-width one — a real
+   touchscreen phone/tablet (`pointer: coarse`) never fires wheel events at
+   all, so it's untouched at any width and keeps native mandatory snap
+   tuned for touch momentum below. Safari keeps native `mandatory` +
+   `scroll-snap-stop: always` untouched everywhere. */
+@media (pointer: fine) {
+  html.is-chromium {
+    scroll-snap-type: none;
+  }
+}
+
 /* The footer is the last section, and shorter than a full viewport at
    most sizes — aligning its TOP edge to the viewport's top (like every
    other section) asks the browser to scroll past the actual end of the
