@@ -554,6 +554,23 @@ body {
     scroll-snap-stop: normal;
   }
 
+  /* Hero's own content (title + tags + copy + image) happens to reflow
+     shorter than a typical tall tablet viewport at this tier — measured at
+     1035px on an iPad-portrait-sized (834×1194) viewport, 159px short of
+     filling it, while Before/After right after it runs *over* the
+     viewport (1238px). That size mismatch between two adjacent snap
+     points is what made the transition between them feel like an
+     unusually long, jarring coast-then-snap compared to other section
+     transitions. Every other section here is left to its natural content
+     height on purpose (see the file-level comment above), but a hero is
+     conventionally expected to fill the screen it opens on regardless of
+     how little content it has — this is the one section worth pinning to
+     at least one full viewport for that reason, not just to patch the
+     transition. */
+  .section[data-frame="1"] {
+    min-height: 100vh;
+  }
+
   /* Top padding only — --section-body-padding-y (120px here) still governs
      the bottom, unchanged. The reference tablet frame has "Before"/"Problem"
      sitting at 80px from the section's own top edge; .info-block already
