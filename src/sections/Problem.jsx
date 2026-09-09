@@ -1,6 +1,7 @@
 import BodyFrame from '../components/BodyFrame.jsx'
 import Placeholder from '../components/Placeholder.jsx'
 import { bodyFrames } from '../content/bodyFrames.jsx'
+import image3 from '../assets/image-3.png'
 
 export default function Problem() {
   const { problem } = bodyFrames
@@ -13,7 +14,7 @@ export default function Problem() {
         </div>
 
         <div className="section-row__image reveal">
-          <Placeholder aspectRatio="864 / 614" label="image 3" parallax />
+          <Placeholder aspectRatio="864 / 614" label="image 3" parallax src={image3} />
         </div>
       </div>
     </section>
