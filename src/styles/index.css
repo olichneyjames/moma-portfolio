@@ -738,3 +738,92 @@ body {
     padding-top: 64px;
   }
 }
+
+/* GradientCarousel (src/components/GradientCarousel.jsx) — namespaced under
+   .gc-* so nothing here collides with the rest of the site's classes.
+   Sizing (card width/height/gap/perspective) is computed in JS off the
+   stage's own measured box, not breakpoint media queries — it fits
+   whatever --row-image-weight/aspect-ratio box it's placed in. */
+.gc-stage {
+  position: relative;
+  width: 100%;
+  overflow: hidden;
+  background: var(--color-placeholder);
+  cursor: grab;
+  touch-action: none;
+  -webkit-user-select: none;
+  user-select: none;
+}
+
+.gc-stage.gc-dragging {
+  cursor: grabbing;
+}
+
+.gc-bg {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  width: 100%;
+  height: 100%;
+  display: block;
+  filter: blur(24px) saturate(1.05);
+  pointer-events: none;
+}
+
+.gc-cards {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  transform-style: preserve-3d;
+}
+
+.gc-card {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform-style: preserve-3d;
+  backface-visibility: hidden;
+  will-change: transform;
+  contain: layout paint;
+}
+
+.gc-card__img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+  border-radius: 0;
+  pointer-events: none;
+  -webkit-user-drag: none;
+  user-select: none;
+}
+
+/* Position/progress pins — matches the Figma "carousel pins" reference:
+   plain rectangles (not circles/pills), fixed height, only the active one
+   colored (via pinColors, e.g. a section's own brand palette in order) and
+   roughly 2x as wide as the rest. Sits INSIDE the frame, under the centered
+   card, not below the frame as a separate strip — cardH leaves room below
+   it (see GradientCarousel.jsx measure()) for this to sit in without
+   overlapping the image itself. Actual width/color transitions are
+   GSAP-driven (the squish-squash); these rules are just each pin's base
+   resting shape. */
+.gc-pins {
+  position: absolute;
+  left: 50%;
+  bottom: 6%;
+  transform: translateX(-50%);
+  z-index: 5000;
+  display: flex;
+  align-items: center;
+  gap: 4.5px;
+}
+
+.gc-pin {
+  width: 10.5px;
+  height: 12px;
+  padding: 0;
+  border: none;
+  border-radius: 0;
+  background: #ffffff;
+  cursor: pointer;
+}

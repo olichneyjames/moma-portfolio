@@ -1,6 +1,22 @@
 import BodyFrame from '../components/BodyFrame.jsx'
-import Placeholder from '../components/Placeholder.jsx'
+import GradientCarousel from '../components/GradientCarousel.jsx'
 import { bodyFrames } from '../content/bodyFrames.jsx'
+import carouselLogo from '../assets/carousel-1-logo.png'
+import carouselColor from '../assets/carousel-1-color.png'
+import carouselType from '../assets/carousel-1-type.png'
+import carouselPeople from '../assets/carousel-1-people.png'
+import carouselMedia from '../assets/carousel-1-media.png'
+
+// Left-to-right order per the "carousel 1" frame group in Figma: Color,
+// Logo, Images of People, Images of Media, Type. Images of Physical
+// Objects (position 4) was replaced with Images of Media. The carousel
+// opens on whichever card is first in this list (Color).
+const solution1Images = [carouselColor, carouselLogo, carouselPeople, carouselMedia, carouselType]
+
+// Pin colors mapped by POSITION, per the "carousel 1 pins" reference:
+// frame 1 (Color) = blue, 2 (Logo) = purple, 3 (People) = orange,
+// 4 (Media) = yellow, 5 (Type) = orange again.
+const solution1PinColors = ['#4DCAFF', '#B473FF', '#FF6535', '#FEB941', '#FF6535']
 
 export default function Solution1() {
   const { solution1 } = bodyFrames
@@ -13,7 +29,12 @@ export default function Solution1() {
         </div>
 
         <div className="section-row__image reveal">
-          <Placeholder aspectRatio="864 / 614" label="image 5" parallax />
+          <GradientCarousel
+            aspectRatio="864 / 614"
+            cardAspectRatio="1820 / 1024"
+            images={solution1Images}
+            pinColors={solution1PinColors}
+          />
         </div>
       </div>
     </section>

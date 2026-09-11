@@ -1,6 +1,7 @@
 import BodyFrame from '../components/BodyFrame.jsx'
 import Placeholder from '../components/Placeholder.jsx'
 import { bodyFrames } from '../content/bodyFrames.jsx'
+import image8 from '../assets/image-8.png'
 
 export default function Reflection() {
   const { reflection } = bodyFrames
@@ -13,7 +14,7 @@ export default function Reflection() {
         </div>
 
         <div className="section-row__image reveal">
-          <Placeholder aspectRatio="864 / 614" label="image 8" parallax />
+          <Placeholder aspectRatio="864 / 614" label="image 8" parallax src={image8} />
         </div>
       </div>
     </section>
