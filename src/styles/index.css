@@ -755,6 +755,10 @@ body {
   user-select: none;
 }
 
+.gc-stage.gc-nav-hover {
+  cursor: pointer;
+}
+
 .gc-stage.gc-dragging {
   cursor: grabbing;
 }

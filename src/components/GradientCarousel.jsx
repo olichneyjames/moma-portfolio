@@ -7,14 +7,14 @@ import gsap from 'gsap'
 // the mechanic in https://github.com/clementgrellier/gradientslider (MIT).
 
 const FRICTION = 0.92
-const DRAG_SENS = 1
+const DRAG_SENS = 1.35
 const CLICK_MAX_MOVEMENT = 6 // px of pointer travel below which a tap counts as a click, not a drag
 // Momentum decays exponentially (FRICTION per frame), so raising this
 // threshold shaves a CONSTANT amount off the wait before snapping regardless
-// of flick strength — the time saved is ln(newValue/oldValue) / (60 *
-// -ln(FRICTION)). Was 6, now 10 (1.67x): ln(10/6) / (60 * 0.0834) ≈ 0.10s sooner.
-const SNAP_VELOCITY_THRESHOLD = 10
-const SNAP_TWEEN_DURATION = 0.5 // seconds; was 0.6
+// of flick strength. Tuned live via a temporary slider panel (90, up from
+// the original 10) for a snappier, less-coasty settle.
+const SNAP_VELOCITY_THRESHOLD = 90
+const SNAP_TWEEN_DURATION = 0.8 // seconds; tuned live via a temporary slider panel (was 0.5)
 
 // Pin sizing — matches the ratios in the Figma "carousel pins" reference
 // (inactive:active width 50:100 = 1:2, height a bit taller than inactive
@@ -274,7 +274,12 @@ export default function GradientCarousel({
       containerHalf = containerW / 2
       cardH = containerH * 0.66
       cardW = cardH * cardRatio
-      gap = Math.max(16, containerW * 0.035)
+      // Purely proportional to containerW (no fixed-px floor) so the gap
+      // keeps shrinking on narrow/mobile stages instead of bottoming out at
+      // a constant that reads as oversized next to a much smaller card.
+      // 0.035 is the ratio already in effect at the widest desktop
+      // container (~863px, see .gc-stage's flex sizing in index.css).
+      gap = containerW * 0.035
       step = cardW + gap
       track = cards.length * step
       perspective = Math.max(700, containerW * 1.35)
@@ -530,6 +535,22 @@ export default function GradientCarousel({
       totalMovement = 0
       stage.setPointerCapture(pointerId)
       stage.classList.add('gc-dragging')
+      stage.classList.remove('gc-nav-hover')
+    }
+
+    // Swaps the drag cursor for a pointer cursor over the outer-sixth
+    // next/prev zones so hovering there reads as "click to advance," not
+    // "drag the carousel."
+    function updateNavHover(e) {
+      if (dragging) return
+      const stageRect = stage.getBoundingClientRect()
+      const localX = e.clientX - (stageRect.left + containerW / 2)
+      const inNavZone = Math.abs(localX) >= containerHalf * (2 / 3)
+      stage.classList.toggle('gc-nav-hover', inNavZone)
+    }
+
+    function onPointerLeave() {
+      stage.classList.remove('gc-nav-hover')
     }
 
     function onPointerMove(e) {
@@ -577,20 +598,31 @@ export default function GradientCarousel({
       stage.releasePointerCapture(pointerId)
       stage.classList.remove('gc-dragging')
       if (totalMovement < CLICK_MAX_MOVEMENT) {
-        // Resolve by nearest card CENTER (see lastPositions comment above),
-        // not by which element the click physically landed on.
         const stageRect = stage.getBoundingClientRect()
         const localX = e.clientX - (stageRect.left + containerW / 2)
-        let nearest = 0
-        let nearestDist = Infinity
-        lastPositions.forEach((pos, i) => {
-          const d = Math.abs(pos - localX)
-          if (d < nearestDist) {
-            nearestDist = d
-            nearest = i
-          }
-        })
-        centerCard(nearest)
+        // The outer quarter of the stage on each side is always a
+        // next/prev click, regardless of exactly where a peeking neighbor
+        // card's own edge happens to fall — a wide, easy-to-hit advance
+        // zone rather than one scaled to card/gap geometry.
+        if (localX <= -containerHalf / 2) {
+          centerCard(mod(activeIndex - 1, cards.length))
+        } else if (localX >= containerHalf / 2) {
+          centerCard(mod(activeIndex + 1, cards.length))
+        } else {
+          // Inner half: resolve by nearest card CENTER (see lastPositions
+          // comment above), not by which element the click physically
+          // landed on.
+          let nearest = 0
+          let nearestDist = Infinity
+          lastPositions.forEach((pos, i) => {
+            const d = Math.abs(pos - localX)
+            if (d < nearestDist) {
+              nearestDist = d
+              nearest = i
+            }
+          })
+          centerCard(nearest)
+        }
       } else {
         vX = -lastVelocity * DRAG_SENS
       }
@@ -598,6 +630,8 @@ export default function GradientCarousel({
 
     stage.addEventListener('pointerdown', onPointerDown)
     stage.addEventListener('pointermove', onPointerMove)
+    stage.addEventListener('pointermove', updateNavHover)
+    stage.addEventListener('pointerleave', onPointerLeave)
     stage.addEventListener('pointerup', onPointerUp)
     stage.addEventListener('pointercancel', onPointerUp)
     stage.addEventListener('dragstart', (e) => e.preventDefault())
@@ -628,6 +662,8 @@ export default function GradientCarousel({
       document.removeEventListener('visibilitychange', onVisibility)
       stage.removeEventListener('pointerdown', onPointerDown)
       stage.removeEventListener('pointermove', onPointerMove)
+      stage.removeEventListener('pointermove', updateNavHover)
+      stage.removeEventListener('pointerleave', onPointerLeave)
       stage.removeEventListener('pointerup', onPointerUp)
       stage.removeEventListener('pointercancel', onPointerUp)
     }
