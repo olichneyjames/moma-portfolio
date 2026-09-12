@@ -34,6 +34,7 @@ export default function Solution1() {
             cardAspectRatio="1820 / 1024"
             images={solution1Images}
             pinColors={solution1PinColors}
+            pinStyle="smooth"
           />
         </div>
       </div>

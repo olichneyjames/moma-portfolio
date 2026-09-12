@@ -150,6 +150,10 @@ export default function GradientCarousel({
   // whose images ARE a brand color palette) give each position pin its own
   // fixed color instead of the neutral default.
   pinColors,
+  // 'squish' (default): the springy overshoot-and-flatten transition.
+  // 'smooth': a single soft, non-elastic width/color tween — no overshoot,
+  // no axis-flatten, just a clean airy resize.
+  pinStyle = 'squish',
 }) {
   const stageRef = useRef(null)
   const cardsWrapRef = useRef(null)
@@ -301,19 +305,42 @@ export default function GradientCarousel({
     function animatePin(el, becomingActive, color) {
       if (!el) return
       gsap.killTweensOf(el)
-      const tl = gsap.timeline()
-      if (becomingActive) {
-        tl.to(el, { width: PIN_ACTIVE_WIDTH * 1.2, scaleY: 0.8, duration: 0.12, ease: 'power2.out', backgroundColor: color })
-          .to(el, { width: PIN_ACTIVE_WIDTH, scaleY: 1, duration: 0.4, ease: 'back.out(2.2)' })
-      } else {
-        tl.to(el, { width: PIN_BASE_WIDTH * 0.65, scaleY: 0.8, duration: 0.1, ease: 'power2.out' }).to(el, {
-          width: PIN_BASE_WIDTH,
-          scaleY: 1,
-          duration: 0.35,
-          ease: 'back.out(2.2)',
-          backgroundColor: PIN_INACTIVE_COLOR,
+      if (pinStyle === 'smooth') {
+        // Clean, airy transition: one soft tween, no overshoot, no
+        // axis-flatten — width and color settle together at an unhurried
+        // pace instead of snapping/bouncing into place.
+        gsap.to(el, {
+          width: becomingActive ? PIN_ACTIVE_WIDTH : PIN_BASE_WIDTH,
+          backgroundColor: becomingActive ? color : PIN_INACTIVE_COLOR,
+          duration: 0.5,
+          ease: 'sine.inOut',
         })
+      } else {
+        // "Squish-squash": height never changes (matches the Figma
+        // "carousel pins" reference — every state has the same 60px-tall
+        // module, only width differs), so the bounce is a brief vertical
+        // flatten layered on top of the width tween itself growing/
+        // shrinking between PIN_BASE_WIDTH and PIN_ACTIVE_WIDTH — the
+        // classic animation-principle move of exaggerating a size change
+        // with an opposite-axis compression on the way, rather than a
+        // plain linear resize.
+        const tl = gsap.timeline()
+        if (becomingActive) {
+          tl.to(el, { width: PIN_ACTIVE_WIDTH * 1.2, scaleY: 0.8, duration: 0.12, ease: 'power2.out', backgroundColor: color })
+            .to(el, { width: PIN_ACTIVE_WIDTH, scaleY: 1, duration: 0.4, ease: 'back.out(2.2)' })
+        } else {
+          tl.to(el, { width: PIN_BASE_WIDTH * 0.65, scaleY: 0.8, duration: 0.1, ease: 'power2.out' }).to(el, {
+            width: PIN_BASE_WIDTH,
+            scaleY: 1,
+            duration: 0.35,
+            ease: 'back.out(2.2)',
+            backgroundColor: PIN_INACTIVE_COLOR,
+          })
+        }
       }
+      // Color only ever applies to the active pin (the reference's inactive
+      // pins are always plain white); becoming active tweens IN the
+      // assigned brand color, becoming inactive tweens back OUT to white.
       el.classList.toggle('gc-pin--active', becomingActive)
     }
 
@@ -564,7 +591,7 @@ export default function GradientCarousel({
       stage.removeEventListener('pointerup', onPointerUp)
       stage.removeEventListener('pointercancel', onPointerUp)
     }
-  }, [images, cardAspectRatio])
+  }, [images, cardAspectRatio, pinStyle])
 
   return (
     <div className={`gc-stage${className ? ` ${className}` : ''}`} ref={stageRef} style={{ aspectRatio }}>
