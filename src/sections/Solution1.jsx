@@ -16,9 +16,10 @@ import carouselMedia from '../assets/carousel-1-media.png'
 const solution1Images = [carouselColor, carouselLogo, carouselPeople, carouselMedia, carouselType]
 
 // Pin colors mapped by POSITION, per the "carousel 1 pins" reference:
-// frame 1 (Color) = blue, 2 (Logo) = purple, 3 (People) = orange,
-// 4 (Media) = yellow, 5 (Type) = orange again.
-const solution1PinColors = ['#4DCAFF', '#B473FF', '#FF6535', '#FEB941', '#FF6535']
+// frame 1 (Color) = green, 2 (Logo) = purple, 3 (People) = orange,
+// 4 (Media) = yellow, 5 (Type) = orange again. (Frame 1 was blue; updated
+// to green to match the reference's current state.)
+const solution1PinColors = ['#A9CC29', '#B473FF', '#FF6535', '#FEB941', '#FF6535']
 
 export default function Solution1() {
   const { solution1 } = bodyFrames
