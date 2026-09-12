@@ -72,7 +72,7 @@ function hslToRgb(h, s, l) {
 
 function fallbackPalette(index) {
   const hue = (index * 47) % 360
-  return { c1: hslToRgb(hue, 0.6, 0.5), c2: hslToRgb(hue, 0.6, 0.72) }
+  return { c1: hslToRgb(hue, 0.85, 0.5), c2: hslToRgb(hue, 0.8, 0.6) }
 }
 
 // Downsamples the image onto an offscreen canvas and buckets pixels into
@@ -132,8 +132,12 @@ function extractPalette(img, index) {
 
     const [pr, pg, pb] = avg(primary)
     const [h1] = rgbToHsl(pr, pg, pb)
-    const c1 = hslToRgb(h1, 0.6, 0.5)
-    const c2 = secondary >= 0 ? hslToRgb(rgbToHsl(...avg(secondary))[0], 0.55, 0.72) : hslToRgb(h1, 0.5, 0.74)
+    // Saturation pushed well above the source's own average (extracted
+    // hues tend to read muddier than the sampled pixels look, once
+    // averaged across a bin) and lightness pulled down from a washed-out
+    // pastel toward something with actual color in it.
+    const c1 = hslToRgb(h1, 0.85, 0.5)
+    const c2 = secondary >= 0 ? hslToRgb(rgbToHsl(...avg(secondary))[0], 0.8, 0.58) : hslToRgb(h1, 0.75, 0.6)
 
     return { c1, c2 }
   } catch {
@@ -154,6 +158,13 @@ export default function GradientCarousel({
   // 'smooth': a single soft, non-elastic width/color tween — no overshoot,
   // no axis-flatten, just a clean airy resize.
   pinStyle = 'squish',
+  // Background gradient's color-vs-gray mix: 0 = fully desaturated (gray,
+  // luminance-matched), 1 = full extracted color. 0.85 was picked by eye
+  // via a temporary live slider (see the commented-out block in
+  // Solution1.jsx) — lives in a ref, not the main effect's state, so it
+  // can still be redriven by a live control later without tearing down/
+  // rebuilding the whole carousel.
+  saturationMix = 0.85,
 }) {
   const stageRef = useRef(null)
   const cardsWrapRef = useRef(null)
@@ -165,6 +176,10 @@ export default function GradientCarousel({
   // re-running the effect or lifting all that mutable animation state into
   // React state.
   const apiRef = useRef({})
+  const saturationMixRef = useRef(saturationMix)
+  useEffect(() => {
+    saturationMixRef.current = saturationMix
+  }, [saturationMix])
 
   useEffect(() => {
     const stage = stageRef.current
@@ -387,6 +402,17 @@ export default function GradientCarousel({
       setActiveGradient(closest)
     }
 
+    // TEMP — luminance-matched gray for a channel triple, so the mix slider
+    // reads as "same brightness, less/more color" rather than also
+    // darkening/lightening things as it moves. Remove alongside
+    // saturationMix/saturationMixRef once tuning is done.
+    function mixTowardGray(r, g, b) {
+      const mix = saturationMixRef.current
+      if (mix >= 1) return [r, g, b]
+      const gray = 0.299 * r + 0.587 * g + 0.114 * b
+      return [gray + (r - gray) * mix, gray + (g - gray) * mix, gray + (b - gray) * mix]
+    }
+
     function drawBackground() {
       const w = containerW
       const h = containerH
@@ -404,14 +430,16 @@ export default function GradientCarousel({
       const r1 = Math.max(w, h) * 0.8
       const r2 = Math.max(w, h) * 0.7
 
+      const [m1r, m1g, m1b] = mixTowardGray(current.r1, current.g1, current.b1)
       const g1 = bgCtx.createRadialGradient(x1, y1, 0, x1, y1, r1)
-      g1.addColorStop(0, `rgba(${current.r1},${current.g1},${current.b1},0.85)`)
+      g1.addColorStop(0, `rgba(${m1r},${m1g},${m1b},1)`)
       g1.addColorStop(1, 'rgba(255,255,255,0)')
       bgCtx.fillStyle = g1
       bgCtx.fillRect(0, 0, w, h)
 
+      const [m2r, m2g, m2b] = mixTowardGray(current.r2, current.g2, current.b2)
       const g2 = bgCtx.createRadialGradient(x2, y2, 0, x2, y2, r2)
-      g2.addColorStop(0, `rgba(${current.r2},${current.g2},${current.b2},0.7)`)
+      g2.addColorStop(0, `rgba(${m2r},${m2g},${m2b},0.9)`)
       g2.addColorStop(1, 'rgba(255,255,255,0)')
       bgCtx.fillStyle = g2
       bgCtx.fillRect(0, 0, w, h)

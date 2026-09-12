@@ -1,3 +1,5 @@
+// Re-enable this import to bring back the saturation-tuning slider below.
+// import { useState } from 'react'
 import BodyFrame from '../components/BodyFrame.jsx'
 import GradientCarousel from '../components/GradientCarousel.jsx'
 import { bodyFrames } from '../content/bodyFrames.jsx'
@@ -20,6 +22,11 @@ const solution1PinColors = ['#4DCAFF', '#B473FF', '#FF6535', '#FEB941', '#FF6535
 
 export default function Solution1() {
   const { solution1 } = bodyFrames
+  // Saturation-tuning slider — disabled for now (0.85 was picked by eye and
+  // is baked in as GradientCarousel's own default). Uncomment this block,
+  // the import at the top of the file, and the saturationMix prop below to
+  // bring the live slider back for further tuning.
+  // const [saturationMix, setSaturationMix] = useState(1)
 
   return (
     <section className="frame section section--body" data-frame="6">
@@ -29,12 +36,38 @@ export default function Solution1() {
         </div>
 
         <div className="section-row__image reveal">
+          {/*
+          <div
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: '12px',
+              marginBottom: '12px',
+              fontFamily: 'monospace',
+              fontSize: '13px',
+            }}
+          >
+            <span>gray</span>
+            <input
+              type="range"
+              min="0"
+              max="1"
+              step="0.01"
+              value={saturationMix}
+              onChange={(e) => setSaturationMix(Number(e.target.value))}
+              style={{ flex: 1 }}
+            />
+            <span>color</span>
+            <span style={{ minWidth: '3.5ch' }}>{saturationMix.toFixed(2)}</span>
+          </div>
+          */}
           <GradientCarousel
             aspectRatio="864 / 614"
             cardAspectRatio="1820 / 1024"
             images={solution1Images}
             pinColors={solution1PinColors}
             pinStyle="smooth"
+            // saturationMix={saturationMix}
           />
         </div>
       </div>
