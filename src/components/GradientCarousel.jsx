@@ -75,6 +75,22 @@ function fallbackPalette(index) {
   return { c1: hslToRgb(hue, 0.85, 0.5), c2: hslToRgb(hue, 0.8, 0.6) }
 }
 
+function hexToRgb(hex) {
+  const clean = hex.replace('#', '')
+  return [parseInt(clean.slice(0, 2), 16), parseInt(clean.slice(2, 4), 16), parseInt(clean.slice(4, 6), 16)]
+}
+
+// Gradient sourced directly from the slide's own pin color instead of
+// sampling the image — c1 is that color as-is (it's already a deliberately
+// chosen brand color, not something that needs re-extracting), c2 is a
+// lighter tint of the same hue so the two radial blobs still read as one
+// coherent glow rather than two unrelated stops.
+function paletteFromPinColor(hex) {
+  const [r, g, b] = hexToRgb(hex)
+  const [h, s] = rgbToHsl(r, g, b)
+  return { c1: [r, g, b], c2: hslToRgb(h, Math.max(0.4, s * 0.85), 0.72) }
+}
+
 // Downsamples the image onto an offscreen canvas and buckets pixels into
 // 12 hue bins (weighted toward mid-saturation, mid-lightness pixels) to
 // find a dominant color, then a second, distinctly-different-hue color for
@@ -229,18 +245,14 @@ export default function GradientCarousel({
     let lastTime = 0
     let isCenteringTween = false
 
-    // Extracted lazily per image rather than assumed-ready at mount: these
-    // are multi-megabyte PNGs, so `img.complete` is still false for most of
-    // them when this effect first runs. Extracting synchronously here would
-    // silently fall back to a fake, index-based hue for every image that
-    // hadn't finished decoding yet — and that fallback would stick forever,
-    // since nothing ever revisits it. Instead each image gets its real
-    // palette the moment it loads, and if it happens to be the card
-    // currently centered, the gradient is refreshed immediately so the
-    // background never stays stuck on a color that doesn't match what's on
-    // screen.
-    const palette = cards.map(() => null)
+    // When a pin color is assigned for a slide, the gradient is built from
+    // THAT color directly — it's already a deliberately chosen brand color,
+    // so there's no need to re-derive one from the image's own pixels (and
+    // no need to wait on image decode, either). Only slides without an
+    // assigned pin color fall back to sampling the image, same as before.
+    const palette = cards.map((_, i) => (pinColors?.[i] ? paletteFromPinColor(pinColors[i]) : null))
     cards.forEach((card, i) => {
+      if (palette[i]) return
       const img = card.querySelector('img')
       const compute = () => {
         palette[i] = extractPalette(img, i)
@@ -619,7 +631,7 @@ export default function GradientCarousel({
       stage.removeEventListener('pointerup', onPointerUp)
       stage.removeEventListener('pointercancel', onPointerUp)
     }
-  }, [images, cardAspectRatio, pinStyle])
+  }, [images, cardAspectRatio, pinStyle, pinColors])
 
   return (
     <div className={`gc-stage${className ? ` ${className}` : ''}`} ref={stageRef} style={{ aspectRatio }}>
